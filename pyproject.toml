@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asd-ste100-issue9-training-data"
+version = "0.1.0"
+description = "Make training data from the ASD-STE100 Issue 9 word list."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "AGPL-3.0-or-later"
+license-files = [
+    "LICENSE",
+]
+authors = [
+    {name = "Ronald Rink"},
+]
+maintainers = [
+    { name = "d-fens GmbH" },
+]
+
+keywords = [
+    "requirements",
+    "technical writing",
+    "technical-writing",
+    "text processing",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Natural Language :: English",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+    "biz-dfch-ste100vocab>=0.4.0",
+    "dacite>=1.9.2",
+    "instructor>=1.15.0",
+    "litellm>=1.86.2",
+    "pydantic>=2.10.0",
+    "python-dotenv>=1.2.2",
+    "requests>=2.34.2",
+    "rich>=14.0.0",
+    "typer>=0.26.3",
+]
+
+# Install with `uv`:
+# uv sync --extra dev --extra build --python 3.13
+# Examine if you can operate `unittest` correctly:
+# uv run python -m unittest discover -v -s tests -t . -p "test_*.py"
+# Examine if you can operate `pylint` correctly:
+# uv run pylint $(git ls-files '*.py')
+[project.optional-dependencies]
+test = [
+    "coverage",
+    "parameterized>=0.9.0",
+    "pylint>=4.0.0",
+]
+
+dev = [
+    "asd-ste100-issue9-training-data[test]",
+    "black",
+    "flake8>=7.3.0",
+    "pip>=26.1.1",
+]
+
+interactive = [
+    "ipykernel",
+]
+
+build = [
+    "pyinstaller>=6.20.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/dfensgmbh/AsdSte100Issue9TrainingData"
+Issues = "https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues"
+
+[tool.uv]
+package = true
+
+[project.scripts]
+create = "main:app"
+
+[tool.black]
+line-length = 80
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[[tool.mypy.overrides]]
+module = ["parameterized.*"]
+ignore_missing_imports = true
