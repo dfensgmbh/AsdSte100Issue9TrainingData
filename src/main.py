@@ -31,6 +31,7 @@ from biz.dfch.training_data.commands import pos
 from biz.dfch.training_data.commands import restriction
 from biz.dfch.training_data.commands import rewrite
 from biz.dfch.training_data.commands import choice
+from biz.dfch.training_data.commands import query
 
 
 from biz.dfch.training_data.info import Info
@@ -63,6 +64,7 @@ app.command(epilog=Info.epilog)(compliance)
 app.command(epilog=Info.epilog)(choice)
 app.command(epilog=Info.epilog)(restriction)
 app.command(epilog=Info.epilog)(paragraph)
+app.command(epilog=Info.epilog)(query)
 
 
 if __name__ == "__main__":

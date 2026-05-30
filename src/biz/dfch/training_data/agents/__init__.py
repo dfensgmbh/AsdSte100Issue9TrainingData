@@ -15,32 +15,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-"""commands module."""
+"""training_data module."""
 
-from .ambiguity import ambiguity
-from .args import NameArg
-from .args import OutputArg
-from .args import OverwriteArg
-from .compliance import compliance
-from .lexicon import lexicon
-from .paragraph import paragraph
-from .pos import pos
-from .restriction import restriction
-from .rewrite import rewrite
-from .choice import choice
-from .query import query
+from ..tools.word_tools import get_etymology
+from ..tools.word_tools import get_word_status
 
 __all__ = [
-    "ambiguity",
-    "compliance",
-    "lexicon",
-    "NameArg",
-    "OutputArg",
-    "OverwriteArg",
-    "paragraph",
-    "pos",
-    "restriction",
-    "rewrite",
-    "choice",
-    "query",
+    "get_etymology",
+    "get_word_status",
 ]
