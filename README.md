@@ -1,5 +1,8 @@
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC_BY--SA_4.0-blue.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
+[![CI](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/actions/workflows/ci.yml?query=branch%3Amain)
+[![CodeQL](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/actions/workflows/codeql.yml?query=branch%3Amain)
 
 # AsdSte100Issue9TrainingData
 
