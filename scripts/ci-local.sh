@@ -67,15 +67,17 @@ step_black()     { uv run black --check .; }
 step_mypy()      { uv run mypy src tests; }
 step_bandit()    { uv run bandit -r src -ll; }
 step_pip_audit() {
-    local req
+    local req rc
     req=$(mktemp --suffix=.txt)
-    trap 'rm -f "$req"' RETURN
     uv export --no-emit-project --no-hashes \
         --format requirements-txt \
         --output-file "$req"
     # Strip the en-core-web-sm GitHub-hosted wheel (same as CI).
     sed -i '/^en-core-web-sm /,/^[^[:space:]#]/{/^en-core-web-sm /d; /^[[:space:]#]/d}' "$req"
     uv run pip-audit --strict --requirement "$req"
+    rc=$?
+    rm -f "$req"
+    return $rc
 }
 step_tests()     {
     uv run coverage run -m unittest discover -v -s tests -t . -p 'test_*.py' \
