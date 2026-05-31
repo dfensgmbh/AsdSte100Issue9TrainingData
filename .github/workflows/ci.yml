@@ -33,7 +33,10 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --extra dev --python ${{ matrix.python-version }}
+        # --extra test is required in addition to --extra dev because uv does
+        # not transitively activate the self-referenced [test] extra inside
+        # the dev extra (`asd-ste100-issue9-training-data[test]`).
+        run: uv sync --extra dev --extra test --python ${{ matrix.python-version }}
 
       - name: Lint (pylint)
         run: uv run pylint $(git ls-files '*.py')
