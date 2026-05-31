@@ -19,10 +19,21 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from pydantic_ai import RunContext
+from spacy.language import Language
 
 from biz.dfch.asdste100vocab import Vocab
 from biz.dfch.logging import log
+
+
+@dataclass(frozen=True)
+class RunCtxDeps:
+    """The `RunContext` dependencies for a `tool_call`."""
+
+    vocab: Vocab
+    nlp: Language
 
 
 class StringBuilder:
@@ -92,12 +103,12 @@ def get_word_status(ctx: RunContext[None], word: str) -> str:
     words = v.find(lemma)
     if words:
         if 1 < len(words):
-            sb.write("It depends.")
+            sb.write("It depends. ")
         for w in words:
             sb.write(
-                f" Status of word '{w.name}' "
+                f"Status of word '{w.name}' "
                 f"as '{w.type_.name}' "
-                f"is {w.status.upper()}."
+                f"is {w.status.upper()}. "
             )
 
         result = sb.to_string()
@@ -113,8 +124,7 @@ def get_word_status(ctx: RunContext[None], word: str) -> str:
         partial = partial[:-1]
 
     not_found = (
-        f"I could not find this word '{word}' "
-        "in the ASD-STE100 vocabulary."
+        f"I could not find this word '{word}' " "in the ASD-STE100 vocabulary. "
     )
     if not partials:
         sb.write(not_found)
@@ -123,12 +133,12 @@ def get_word_status(ctx: RunContext[None], word: str) -> str:
         return result
 
     sb.write(not_found)
-    sb.write(" But I found these similar words:")
+    sb.write("But I found these similar words: ")
     for w in partials[:5]:
         sb.write(
-            f" Status of word '{w.name}' "
+            f"Status of word '{w.name}' "
             f"as '{w.type_.name}' "
-            f"is {w.status.upper()}."
+            f"is {w.status.upper()}. "
         )
 
     result = sb.to_string()

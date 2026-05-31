@@ -15,27 +15,25 @@
 
 """'query' command."""
 
-import copy
 from datetime import datetime
-from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Annotated
-from typing import Any
 
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import typer
 import spacy
-from spacy.language import Language
 
-
-from biz.dfch.logging import log
 from biz.dfch.asdste100vocab import Vocab
 
-from ..agents.ste100_agent import Ste100Agent
+from biz.dfch.logging import log
+from biz.dfch.diagnostics import Stopwatch
+
+
+from ..agents.lite_llm_agent import LiteLlmAgent
 from ..info import Info
-from ..tools.word_tools import get_word_status, get_etymology
+from ..tools import get_word_status, RunCtxDeps
 
 from .args import NameArg, OutputArg, OverwriteArg
 
@@ -49,48 +47,25 @@ app = typer.Typer(
 )
 
 
-@dataclass(frozen=True)
-class Deps:
-    vocab: Vocab
-    nlp: Language
-
-
-class FlatBaseModel(BaseModel):
-    """Pydantic BaseModel with flattened schema."""
-
-    @staticmethod
-    def _inline_refs(schema: dict[str, Any]) -> dict[str, Any]:
-        schema = copy.deepcopy(schema)
-        defs = schema.pop("$defs", None) or schema.pop("definitions", None) or {}
-
-        def _resolve(node):
-            if isinstance(node, dict):
-                ref = node.get("$ref")
-                if isinstance(ref, str) and ref.startswith("#/$defs/"):
-                    name = ref.split("/")[-1]
-                    return _resolve(copy.deepcopy(defs[name]))
-                return {k: _resolve(v) for k, v in node.items()}
-            if isinstance(node, list):
-                return [_resolve(x) for x in node]
-            return node
-
-        return _resolve(schema)
-
-    @classmethod
-    def model_json_schema(cls, *args, **kwargs):
-        return FlatBaseModel._inline_refs(super().model_json_schema(*args, **kwargs))
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema, handler):  # type: ignore[override]
-        return FlatBaseModel._inline_refs(handler(core_schema))
-
-
 class WordStatus(BaseModel):
+    """Represents the ASD-STE100 status of a single word as evaluated
+    by the LLM.
+
+    Attributes:
+        word (str): The original word from the input text.
+        summary (str): A brief explanation of the ASD-STE100 status or
+            relevance of the word.
+        word_status (str): Show the ASD-STE100 status of word.
+    """
+
+    word: str
     summary: str
-    is_approved: bool
+    status: str
 
 
 class FinalResponse(BaseModel):
+    """Represents the final JSON formatted output from the LLM response."""
+
     words: list[WordStatus]
 
 
@@ -174,7 +149,16 @@ def query(
     log.debug("query: url=%s, model=%s", url, model)
     log.debug(f"input: '{text}'")
 
-    agent = Ste100Agent(url=url, api_key=api_token, model=model)
+    system = (
+        "You are a helpful technical writer. "
+        "You MUST respond only in valid JSON format that you see in "
+        "the tool 'final_result'. "
+        "Do not include any conversational text before or after the "
+        "JSON block."
+    )
+    agent = LiteLlmAgent(
+        url=url, api_key=api_token, model=model, system_prompt=system
+    )
 
     agent.add_tools(
         [
@@ -184,17 +168,23 @@ def query(
     )
 
     v = Vocab()
-    deps = Deps(vocab=v, nlp=nlp)
+    deps = RunCtxDeps(vocab=v, nlp=nlp)
+    sw = Stopwatch()
+    log.debug("Query LLM ...")
+    sw.start()
     result = agent.run(
         text,
         deps=deps,
         output_type=FinalResponse,
     )
+    sw.stop()
+    log.info("Query LLM OK. [%.3f]", sw.elapsed_seconds)
 
     log.debug(result)
     assert isinstance(result.output, FinalResponse), type(result.output)
     for w in result.output.words:
+        log.debug(f"word: {w.word}")
         log.debug(f"summary: {w.summary}")
-        log.debug(f"is_approved: {w.is_approved}")
+        log.debug(f"status: {w.status}")
 
     return
