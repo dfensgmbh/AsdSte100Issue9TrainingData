@@ -16,6 +16,12 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
+    env:
+      # Prevent `uv run` from re-syncing with a different (default-only)
+      # extra set on every invocation. We do one explicit `uv sync` with
+      # the extras we need above, and every subsequent `uv run` must use
+      # that environment as-is.
+      UV_NO_SYNC: "1"
 
     steps:
       - name: Checkout
