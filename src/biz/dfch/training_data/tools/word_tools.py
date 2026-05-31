@@ -27,6 +27,8 @@ from spacy.language import Language
 from biz.dfch.asdste100vocab import Vocab
 from biz.dfch.logging import log
 
+from biz.dfch.text import StringBuilder
+
 
 @dataclass(frozen=True)
 class RunCtxDeps:
@@ -34,48 +36,6 @@ class RunCtxDeps:
 
     vocab: Vocab
     nlp: Language
-
-
-class StringBuilder:
-    """A `StringBuilder` class."""
-
-    _lines: list[str]
-
-    def __init__(self) -> None:
-        self._lines = []
-
-    def clear(self) -> StringBuilder:
-        """Remove all content from the `StringBuilder` instance."""
-
-        self._lines.clear()
-
-        return self
-
-    def to_string(self) -> str:
-        """Create a string from the `StringBuilder` instance."""
-
-        result = "".join(self._lines)
-
-        return result
-
-    def write(self, value: str) -> StringBuilder:
-        """Add text to the `StringBuilder` instance."""
-
-        assert isinstance(value, str), type(value)
-
-        self._lines.append(value)
-
-        return self
-
-    def write_line(self, value: str = "") -> StringBuilder:
-        """Add text to and a newline the `StringBuilder` instance."""
-
-        assert isinstance(value, str), type(value)
-
-        self._lines.append(value)
-        self._lines.append("\n")
-
-        return self
 
 
 def get_word_status(ctx: RunContext[None], word: str) -> str:
