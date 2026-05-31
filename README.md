@@ -31,7 +31,7 @@ file for every command is a JSON Lines file named
 | `grammar` | Task 9: Internal Grammar Engine (POS Identification) ([#9](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/9)) | `task09.jsonl` | Stub |
 | `verb` | Task 10: Approved Verb Lookup by Definition ([#10](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/10)) | `task10.jsonl` | Stub |
 | `category` | Task 11: Category-Based Word Restrictions ([#11](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/11)) | `task11.jsonl` | Stub |
-| `query` | Interactive ASD-STE100 query against a chat model | `response-<timestamp>.json` | **Working** (only command currently implemented) |
+| `query` | Interactive ASD-STE100 query against a chat model | `response-<timestamp>.json` | **WIP** |
 
 ### Progress
 
@@ -43,7 +43,3 @@ up in the ASD-STE100 vocabulary, and is required to return a JSON
 response listing every word together with a short summary and its
 ASD-STE100 status.
 
-The other 11 commands (`ambiguity` through `category`) are registered
-placeholders. They validate their arguments, log their inputs, and
-exit without producing data. Each command tracks its own GitHub issue
-(see the table) where the dataset design is being worked out.
