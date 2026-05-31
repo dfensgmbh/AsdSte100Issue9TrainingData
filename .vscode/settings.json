@@ -14,9 +14,11 @@
         "levelname",
         "litellm",
         "mypy",
+        "onefile",
         "pydantic",
         "pyinstaller",
         "pylint",
+        "PYTHONIOENCODING",
         "setuptools",
         "typer"
     ],
