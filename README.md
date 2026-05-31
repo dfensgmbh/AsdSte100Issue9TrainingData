@@ -8,6 +8,8 @@
 
 Training datasets for ASD-STE100 Issue 9.
 
+**WIP** no training data yet available!!
+
 This training dataset let you fine-tune an LLM to better understand, what the words in the "ASD-STE100 Issue 9" standard mean.
 
 ## Datasets
