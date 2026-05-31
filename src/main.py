@@ -15,55 +15,22 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# pylint: disable=C0413
-# flake8: noqa: E402
+"""Backwards-compatible entry point shim.
 
-"""Entry point."""
+The canonical Typer application now lives in
+:mod:`biz.dfch.training_data.cli`. This module simply re-exports
+``app`` for any caller that still imports ``main:app`` (for example,
+the legacy console-script entry in ``pyproject.toml`` or
+``src/biz/__main__.py``).
 
-from dotenv import load_dotenv
-import typer
+Prefer one of the following invocation styles:
 
-from biz.dfch.training_data.commands import ambiguity
-from biz.dfch.training_data.commands import compliance
-from biz.dfch.training_data.commands import lexicon
-from biz.dfch.training_data.commands import paragraph
-from biz.dfch.training_data.commands import pos
-from biz.dfch.training_data.commands import restriction
-from biz.dfch.training_data.commands import rewrite
-from biz.dfch.training_data.commands import choice
+* ``create`` (the installed console script)
+* ``python -m biz.dfch.training_data``
+* ``python -m biz.dfch.training_data.cli``
+"""
 
-
-from biz.dfch.training_data.info import Info
-
-load_dotenv()
-
-app = typer.Typer(
-    name=Info.name,
-    help=Info.description,
-    epilog=Info.epilog,
-    no_args_is_help=True,
-)
-
-
-@app.callback()
-def _callback(ctx: typer.Context):
-    # We use `callback` only to make sure that `typer` continues to show
-    # "sub-commands" when there is only one "sub-command".
-
-    _ = ctx
-
-    return
-
-
-app.command(epilog=Info.epilog)(ambiguity)
-app.command(epilog=Info.epilog)(lexicon)
-app.command(epilog=Info.epilog)(pos)
-app.command(epilog=Info.epilog)(rewrite)
-app.command(epilog=Info.epilog)(compliance)
-app.command(epilog=Info.epilog)(choice)
-app.command(epilog=Info.epilog)(restriction)
-app.command(epilog=Info.epilog)(paragraph)
-
+from biz.dfch.training_data.cli import app
 
 if __name__ == "__main__":
     app()

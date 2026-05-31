@@ -44,14 +44,17 @@ classifiers = [
 ]
 
 dependencies = [
-    "biz-dfch-ste100vocab>=0.4.0",
+    "biz-dfch-ste100vocab>=0.5.0",
     "dacite>=1.9.2",
     "instructor>=1.15.0",
     "litellm>=1.86.2",
     "pydantic>=2.10.0",
+    "pydantic-ai>=1.104.0",
     "python-dotenv>=1.2.2",
     "requests>=2.34.2",
     "rich>=14.0.0",
+    "spacy>=3.8.14",
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
     "typer>=0.26.3",
 ]
 
@@ -63,8 +66,11 @@ dependencies = [
 # uv run pylint $(git ls-files '*.py')
 [project.optional-dependencies]
 test = [
+    "bandit>=1.7.9",
     "coverage",
+    "mypy>=1.11.0",
     "parameterized>=0.9.0",
+    "pip-audit>=2.7.3",
     "pylint>=4.0.0",
 ]
 
@@ -91,15 +97,68 @@ Issues = "https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues"
 package = true
 
 [project.scripts]
-create = "main:app"
+create = "biz.dfch.training_data.cli:app"
 
 [tool.black]
 line-length = 80
+# Match the project's supported Python range (requires-python = ">=3.11").
+# Without this, black may default to a target newer than the runtime can
+# parse, causing the AST safety check to fail.
+target-version = ["py311", "py312", "py313"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 namespaces = true
 
+[tool.mypy]
+# Match the lowest supported Python (requires-python = ">=3.11").
+python_version = "3.11"
+# The package lives under src/ as a PEP 420 namespace package.
+# Without these settings mypy confuses `src/biz/dfch/logging/__init__.py`
+# with the stdlib `logging` module.
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+# Many of our third-party deps (spacy, litellm, instructor, typer, etc.)
+# ship without type stubs. Silence those rather than annotating each one.
+ignore_missing_imports = true
+follow_imports = "silent"
+# Lenient starting posture - tighten gradually as annotations are added.
+disallow_untyped_defs = false
+check_untyped_defs = false
+# Many existing `# type: ignore` comments are intentionally kept so that
+# they remain useful once mypy is tightened (e.g. check_untyped_defs=true,
+# disallow_untyped_defs=true). Disable the warning for now.
+warn_unused_ignores = false
+warn_redundant_casts = true
+
 [[tool.mypy.overrides]]
 module = ["parameterized.*"]
 ignore_missing_imports = true
+
+[tool.pylint.main]
+# Pass CI as long as the overall score is at least this high. Style /
+# convention findings still appear in the log but do not fail the build.
+fail-under = 9.0
+
+[tool.pylint."messages control"]
+disable = [
+    # R0801 - Typer command modules share intentional boilerplate
+    # (app = typer.Typer(...), the overwrite-confirm block, etc.).
+    "duplicate-code",
+    # R1711 - explicit `return None` in Typer commands documents that
+    # the command produces no value; we keep it on purpose.
+    "useless-return",
+    # R0903 - small data-container classes are fine.
+    "too-few-public-methods",
+]
+
+[tool.pylint.design]
+# Generous limits: this project has agent / command modules that are
+# naturally a bit long, and test classes with many test_* methods.
+max-locals = 25
+max-branches = 20
+max-statements = 80
+max-public-methods = 100
+max-args = 10
+max-positional-arguments = 10

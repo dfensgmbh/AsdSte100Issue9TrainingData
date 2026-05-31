@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'compliance-check' command."""
+"""'grammar' command."""
 
 from pathlib import Path
 
@@ -38,28 +38,29 @@ app = typer.Typer(
 
 
 @app.command()
-def compliance(
+def grammar(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task05.jsonl",
+    file: NameArg = "task09.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 5: Compliance Verification of Correct Usage".
+    Make the dataset for "Task 9: Internal Grammar Engine (POS Identification)".
 
-    Issue #5, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/5
+    Issue #9, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/9
 
-    Generates training examples that ask the model to verify whether a
-    given sentence already conforms to ASD-STE100 rules, and to justify
-    the verdict (approved usage, approved POS, no restricted vocabulary).
+    Generates training examples that strengthen the model's internal
+    grammar engine by asking it to identify the part of speech of a
+    word inside a sentence and to derive the ASD-STE100 approval
+    verdict from that POS.
 
     Args:
         ctx (typer.Context): The Typer context (unused; required so the
             command integrates with the parent Typer application).
         output (OutputArg): Directory in which the dataset file is
             written. Must exist. Defaults to the current directory.
-                file (NameArg): Name of the output JSONL file. Defaults to
-            ``"task05.jsonl"``.
+        file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task09.jsonl"``.
         overwrite (OverwriteArg): When ``True``, an existing output
             file is replaced without prompting. When ``False`` and the
             file exists, the user is asked for confirmation.
@@ -89,11 +90,8 @@ def compliance(
         if not overwrite:
             raise typer.Abort()
 
-        log.debug(
-            "compliance_check: output=%s, file=%s, overwrite=%s",
-            output,
-            file,
-            overwrite,
-        )
+    log.debug(
+        "grammar: output=%s, file=%s, overwrite=%s", output, file, overwrite
+    )
 
     return

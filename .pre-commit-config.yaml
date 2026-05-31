@@ -1,0 +1,47 @@
+# Run locally with:  uv run pre-commit run --all-files
+# Install hooks with: uv run pre-commit install
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+
+  # pylint and mypy run via local uv so they use the project's resolved env
+  # (avoids re-installing heavy deps like spacy in an isolated hook env)
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: uv run pylint
+        language: system
+        types: [python]
+        require_serial: true
+
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
+        args: ["src", "tests"]

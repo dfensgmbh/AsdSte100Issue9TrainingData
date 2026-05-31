@@ -24,7 +24,16 @@
 # pylint: disable=E0401
 # pylint: disable=E0611
 
-"""Module log"""
+"""
+Module log
+
+Consider to set these environment variables to avoid UTF-8 logging errors:
+
+PYTHONIOENCODING=utf-8
+PYTHONUTF8=1
+"""
+
+import sys
 
 import logging
 import logging.config
@@ -65,8 +74,15 @@ def get_project_src() -> Path:
     return result
 
 
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore
+    except (AttributeError, ValueError):
+        # Streams may be redirected (e.g. pytest capture, pyinstaller)
+        # and not support reconfigure(); ignore in that case.
+        pass
+
 try:
-    print(get_project_src() / _LOGGER_FILE)
     logging.config.fileConfig(get_project_src() / _LOGGER_FILE)
     log = logging.getLogger(_LOGGER_NAME)  # type: ignore
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
+﻿# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -12,14 +12,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-# pylint: disable=C0415
-# pylint: disable=E0401
-# noqa: E501
-
-"""Application entry point."""
-
-from main import app
-
-if __name__ == "__main__":
-    app()

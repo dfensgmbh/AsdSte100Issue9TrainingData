@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
+﻿# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'compliance-check' command."""
+"""'category' command."""
 
 from pathlib import Path
 
@@ -38,28 +38,30 @@ app = typer.Typer(
 
 
 @app.command()
-def compliance(
+def category(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task05.jsonl",
+    file: NameArg = "task11.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 5: Compliance Verification of Correct Usage".
+    Make the dataset for "Task 11: Category-Based Word Restrictions".
 
-    Issue #5, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/5
+    Issue #11,
+    https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/11
 
-    Generates training examples that ask the model to verify whether a
-    given sentence already conforms to ASD-STE100 rules, and to justify
-    the verdict (approved usage, approved POS, no restricted vocabulary).
+    Generates training examples that explain why a word is rejected
+    based on general ASD-STE100 categories (for example "compound
+    verbs" or "helping verbs") and that name the approved direct verb
+    or alternative.
 
     Args:
         ctx (typer.Context): The Typer context (unused; required so the
             command integrates with the parent Typer application).
         output (OutputArg): Directory in which the dataset file is
             written. Must exist. Defaults to the current directory.
-                file (NameArg): Name of the output JSONL file. Defaults to
-            ``"task05.jsonl"``.
+        file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task11.jsonl"``.
         overwrite (OverwriteArg): When ``True``, an existing output
             file is replaced without prompting. When ``False`` and the
             file exists, the user is asked for confirmation.
@@ -89,11 +91,8 @@ def compliance(
         if not overwrite:
             raise typer.Abort()
 
-        log.debug(
-            "compliance_check: output=%s, file=%s, overwrite=%s",
-            output,
-            file,
-            overwrite,
-        )
+    log.debug(
+        "category: output=%s, file=%s, overwrite=%s", output, file, overwrite
+    )
 
     return

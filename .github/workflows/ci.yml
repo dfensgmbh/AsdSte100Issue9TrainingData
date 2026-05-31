@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    env:
+      # Prevent `uv run` from re-syncing with a different (default-only)
+      # extra set on every invocation. We do one explicit `uv sync` with
+      # the extras we need above, and every subsequent `uv run` must use
+      # that environment as-is.
+      UV_NO_SYNC: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install uv (with cache)
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          # Bump this suffix to force a fresh cache when deps mysteriously
+          # appear stale (e.g., missing console scripts after adding a tool).
+          cache-suffix: v2
+          cache-dependency-glob: |
+            uv.lock
+            pyproject.toml
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        # --extra test is required in addition to --extra dev because uv does
+        # not transitively activate the self-referenced [test] extra inside
+        # the dev extra (`asd-ste100-issue9-training-data[test]`).
+        run: uv sync --extra dev --extra test --python ${{ matrix.python-version }}
+
+      - name: Lint (pylint)
+        run: uv run pylint $(git ls-files '*.py')
+
+      - name: Lint (flake8)
+        run: uv run flake8 src tests
+
+      - name: Format check (black)
+        run: uv run black --check .
+
+      - name: Type check (mypy)
+        run: uv run mypy src tests
+
+      - name: Security scan (bandit)
+        run: uv run bandit -r src -ll
+
+      - name: Dependency vulnerability audit (pip-audit)
+        # Audit only the *locked dependency graph*, not the installed
+        # environment. This sidesteps two problems:
+        #   1. Our own package is installed as editable, which pip-audit's
+        #      --strict mode rejects.
+        #   2. Our own package is not on PyPI and would fail lookup.
+        # `uv export` produces a requirements.txt-compatible file from
+        # uv.lock; `--no-emit-project` omits the local package itself.
+        # We also strip the spaCy `en_core_web_sm` model wheel because it is
+        # hosted on GitHub, not PyPI, and pip-audit cannot resolve it.
+        # Add `--ignore-vuln GHSA-xxxx` lines (or pass --ignore-vuln on the
+        # pip-audit command) for vulnerabilities we explicitly accept.
+        run: |
+          uv export --no-emit-project --no-hashes \
+            --format requirements-txt \
+            --output-file requirements-audit.txt
+          # Drop the en-core-web-sm line (and its `# via ...` annotation
+          # block) so pip-audit does not try to look it up on PyPI.
+          sed -i '/^en-core-web-sm /,/^[^[:space:]#]/{/^en-core-web-sm /d; /^[[:space:]#]/d}' requirements-audit.txt
+          uv run pip-audit --strict --requirement requirements-audit.txt
+
+      # Optional: run all pre-commit hooks in CI to enforce that contributors
+      # actually executed them locally before pushing. This is somewhat
+      # redundant with the explicit lint/format/type steps above (black,
+      # flake8, pylint, mypy are all configured in .pre-commit-config.yaml),
+      # but it additionally enforces the hygiene hooks (trailing whitespace,
+      # EOL, YAML/TOML syntax, large-file guard, etc.).
+      # Enable later if you want a single source of truth for code quality.
+      # - name: Run pre-commit
+      #   run: uv run pre-commit run --all-files --show-diff-on-failure
+
+      - name: Run tests with coverage
+        run: |
+          uv run coverage run -m unittest discover -v -s tests -t . -p "test_*.py"
+          uv run coverage report -m
+          uv run coverage xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: warn
+
+  build:
+    runs-on: ubuntu-24.04
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install uv (with cache)
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            uv.lock
+            pyproject.toml
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Build distribution
+        run: uv build

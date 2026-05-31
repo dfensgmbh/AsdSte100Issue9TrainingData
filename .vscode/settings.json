@@ -1,22 +1,28 @@
 {
     "python.REPL.enableREPLSmartSend": false,
     "cSpell.words": [
+        "acompletion",
         "aeiou",
         "asctime",
         "asdste",
         "dacite",
         "dfch",
         "dotenv",
+        "funcs",
         "Internationalisation",
         "ipykernel",
         "levelname",
         "litellm",
         "mypy",
+        "onefile",
         "pydantic",
         "pyinstaller",
         "pylint",
+        "PYTHONIOENCODING",
         "setuptools",
-        "typer"
+        "spacy",
+        "typer",
+        "usecwd"
     ],
     "python.testing.unittestArgs": [
         "-v",
