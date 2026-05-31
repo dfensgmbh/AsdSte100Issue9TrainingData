@@ -15,22 +15,9 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-"""Backwards-compatible entry point shim.
+"""Module entry point for ``python -m biz.dfch.training_data``."""
 
-The canonical Typer application now lives in
-:mod:`biz.dfch.training_data.cli`. This module simply re-exports
-``app`` for any caller that still imports ``main:app`` (for example,
-the legacy console-script entry in ``pyproject.toml`` or
-``src/biz/__main__.py``).
-
-Prefer one of the following invocation styles:
-
-* ``create`` (the installed console script)
-* ``python -m biz.dfch.training_data``
-* ``python -m biz.dfch.training_data.cli``
-"""
-
-from biz.dfch.training_data.cli import app
+from .cli import app
 
 if __name__ == "__main__":
     app()

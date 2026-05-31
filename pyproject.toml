@@ -93,7 +93,7 @@ Issues = "https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues"
 package = true
 
 [project.scripts]
-create = "main:app"
+create = "biz.dfch.training_data.cli:app"
 
 [tool.black]
 line-length = 80
