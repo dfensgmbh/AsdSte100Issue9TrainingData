@@ -63,10 +63,25 @@ jobs:
         run: uv run bandit -r src -ll
 
       - name: Dependency vulnerability audit (pip-audit)
-        # --skip-editable: do not try to look up our own local package on PyPI
-        # --strict: also fail on warnings (e.g. skipped deps)
-        # Add `--ignore-vuln GHSA-xxxx` entries for vulns we explicitly accept.
-        run: uv run pip-audit --strict --skip-editable
+        # Audit only the *locked dependency graph*, not the installed
+        # environment. This sidesteps two problems:
+        #   1. Our own package is installed as editable, which pip-audit's
+        #      --strict mode rejects.
+        #   2. Our own package is not on PyPI and would fail lookup.
+        # `uv export` produces a requirements.txt-compatible file from
+        # uv.lock; `--no-emit-project` omits the local package itself.
+        # We also strip the spaCy `en_core_web_sm` model wheel because it is
+        # hosted on GitHub, not PyPI, and pip-audit cannot resolve it.
+        # Add `--ignore-vuln GHSA-xxxx` lines (or pass --ignore-vuln on the
+        # pip-audit command) for vulnerabilities we explicitly accept.
+        run: |
+          uv export --no-emit-project --no-hashes \
+            --format requirements-txt \
+            --output-file requirements-audit.txt
+          # Drop the en-core-web-sm line (and its `# via ...` annotation
+          # block) so pip-audit does not try to look it up on PyPI.
+          sed -i '/^en-core-web-sm /,/^[^[:space:]#]/{/^en-core-web-sm /d; /^[[:space:]#]/d}' requirements-audit.txt
+          uv run pip-audit --strict --requirement requirements-audit.txt
 
       # Optional: run all pre-commit hooks in CI to enforce that contributors
       # actually executed them locally before pushing. This is somewhat
