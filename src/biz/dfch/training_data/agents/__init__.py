@@ -15,12 +15,10 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-"""training_data module."""
+"""agents module."""
 
-from ..tools.word_tools import get_etymology
-from ..tools.word_tools import get_word_status
+from .lite_llm_agent import LiteLlmAgent
 
 __all__ = [
-    "get_etymology",
-    "get_word_status",
+    "LiteLlmAgent",
 ]
