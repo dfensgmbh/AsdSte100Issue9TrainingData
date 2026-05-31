@@ -47,11 +47,6 @@ jobs:
         # the dev extra (`asd-ste100-issue9-training-data[test]`).
         run: uv sync --extra dev --extra test --python ${{ matrix.python-version }}
 
-      - name: Debug installed tools (temporary)
-        run: |
-          uv pip list | grep -iE "^(pylint|bandit|mypy|pip-audit|flake8|black|coverage)\b" || true
-          ls -la .venv/bin/ | grep -iE "pylint|bandit|mypy|pip-audit|flake8|black|coverage" || true
-
       - name: Lint (pylint)
         run: uv run pylint $(git ls-files '*.py')
 

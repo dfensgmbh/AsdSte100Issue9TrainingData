@@ -109,3 +109,30 @@ namespaces = true
 [[tool.mypy.overrides]]
 module = ["parameterized.*"]
 ignore_missing_imports = true
+
+[tool.pylint.main]
+# Pass CI as long as the overall score is at least this high. Style /
+# convention findings still appear in the log but do not fail the build.
+fail-under = 9.0
+
+[tool.pylint."messages control"]
+disable = [
+    # R0801 - Typer command modules share intentional boilerplate
+    # (app = typer.Typer(...), the overwrite-confirm block, etc.).
+    "duplicate-code",
+    # R1711 - explicit `return None` in Typer commands documents that
+    # the command produces no value; we keep it on purpose.
+    "useless-return",
+    # R0903 - small data-container classes are fine.
+    "too-few-public-methods",
+]
+
+[tool.pylint.design]
+# Generous limits: this project has agent / command modules that are
+# naturally a bit long, and test classes with many test_* methods.
+max-locals = 25
+max-branches = 20
+max-statements = 80
+max-public-methods = 100
+max-args = 10
+max-positional-arguments = 10
