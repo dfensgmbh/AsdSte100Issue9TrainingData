@@ -33,7 +33,7 @@ from biz.dfch.diagnostics import Stopwatch
 
 from ..agents.lite_llm_agent import LiteLlmAgent
 from ..info import Info
-from ..tools import get_word_status, RunCtxDeps
+from ..tools import WordTools
 
 from .args import NameArg, OutputArg, OverwriteArg
 
@@ -202,10 +202,15 @@ def query(
         url=url, api_key=api_token, model=model, system_prompt=system
     )
 
+    word_tools = WordTools(
+        vocab=Vocab(),
+        nlp=spacy.load("en_core_web_sm", disable=["ner", "parser"])
+    )
+
     agent.add_tools(
         [
-            # get_etymology,
-            get_word_status,
+            word_tools.get_word_alternative,
+            word_tools.get_word_status,
         ]
     )
 
@@ -216,7 +221,7 @@ def query(
     sw.start()
     result = agent.run(
         text,
-        deps=deps,
+        deps=word_tools.deps,
         output_type=FinalResponse,
     )
     sw.stop()

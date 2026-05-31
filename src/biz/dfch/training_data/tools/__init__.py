@@ -17,12 +17,8 @@
 
 """training_data module."""
 
-from .word_tools import get_word_alternative
-from .word_tools import get_word_status
-from .word_tools import RunCtxDeps
+from .word_tools import WordTools
 
 __all__ = [
-    "get_word_alternative",
-    "get_word_status",
-    "RunCtxDeps",
+    "WordTools",
 ]
