@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
+﻿# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -156,7 +156,7 @@ class StringBuilder:
         return self
 
     def join(self, other: StringBuilder) -> StringBuilder:
-        """Appends the contents of another :class:`StringBuilder` 
+        """Appends the contents of another :class:`StringBuilder`
         to this instance.
 
         The source instance is not modified.
@@ -254,6 +254,6 @@ class StringBuilder:
                 f"{start_index} + {length} > {len(joined)}."
             )
 
-        self._lines = [joined[:start_index] + joined[start_index + length:]]
+        self._lines = [joined[:start_index] + joined[start_index + length :]]
 
         return self

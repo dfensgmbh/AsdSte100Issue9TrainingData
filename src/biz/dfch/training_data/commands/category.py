@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
+﻿# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -47,7 +47,7 @@ def category(
     """
     Make the dataset for "Task 11: Category-Based Word Restrictions".
 
-    Issue #11, 
+    Issue #11,
     https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/11
 
     Generates training examples that explain why a word is rejected

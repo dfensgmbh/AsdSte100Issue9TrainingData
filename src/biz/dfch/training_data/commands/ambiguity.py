@@ -52,7 +52,7 @@ def ambiguity(
     """
     Make the dataset for "Task 1: Ambiguity".
 
-    Issue #1, 
+    Issue #1,
     https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/1
 
     Iterates over all words in the ASD-STE100 vocabulary and emits one

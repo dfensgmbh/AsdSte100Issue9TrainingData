@@ -76,7 +76,7 @@ def get_project_src() -> Path:
 
 for _stream in (sys.stdout, sys.stderr):
     try:
-        _stream.reconfigure(encoding="utf-8", errors="replace")  # type:ignore
+        _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore
     except (AttributeError, ValueError):
         # Streams may be redirected (e.g. pytest capture, pyinstaller)
         # and not support reconfigure(); ignore in that case.

@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
+﻿# Copyright (C) 2026 Ronald Rink, d-fens GmbH, http://d-fens.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -24,13 +24,8 @@ from datetime import datetime, timedelta, timezone
 from biz.dfch.diagnostics import Clock
 from biz.dfch.diagnostics.clock import Clock as DirectClock
 
-
-ISO_PATTERN = re.compile(
-    r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$"
-)
-FILE_PATTERN = re.compile(
-    r"^\d{4}-\d{2}-\d{2}---\d{2}-\d{2}-\d{2}$"
-)
+ISO_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$")
+FILE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}---\d{2}-\d{2}-\d{2}$")
 
 
 class TestClock(unittest.TestCase):
@@ -149,27 +144,19 @@ class TestClock(unittest.TestCase):
 
     def test_reset_returns_to_live_mode_after_frozen(self):
         """`_reset` returns to live mode from a frozen state."""
-        Clock._set_frozen(
-            datetime(2000, 1, 1, tzinfo=timezone.utc)
-        )
+        Clock._set_frozen(datetime(2000, 1, 1, tzinfo=timezone.utc))
         Clock._reset()
         now_after = Clock.now()
         system_now = datetime.now().astimezone()
-        self.assertLess(
-            abs((now_after - system_now).total_seconds()), 1.0
-        )
+        self.assertLess(abs((now_after - system_now).total_seconds()), 1.0)
 
     def test_reset_returns_to_live_mode_after_offset(self):
         """`_reset` returns to live mode from an offset state."""
-        Clock._set_datetime(
-            datetime(2030, 1, 1, tzinfo=timezone.utc)
-        )
+        Clock._set_datetime(datetime(2030, 1, 1, tzinfo=timezone.utc))
         Clock._reset()
         now_after = Clock.now()
         system_now = datetime.now().astimezone()
-        self.assertLess(
-            abs((now_after - system_now).total_seconds()), 1.0
-        )
+        self.assertLess(abs((now_after - system_now).total_seconds()), 1.0)
 
     def test_reset_on_live_clock_is_noop(self):
         """Calling `_reset` on an already-live clock is harmless."""
@@ -226,7 +213,7 @@ class TestClock(unittest.TestCase):
 
     def test_now_isodate_truncates_milliseconds(self):
         """`now_isodate` truncates microseconds rather than rounding."""
-        # 999999 microseconds == 999.999 ms; truncated → 999, not 1000.
+        # 999999 microseconds == 999.999 ms; truncated â†’ 999, not 1000.
         dt = datetime(2024, 1, 1, 0, 0, 0, 999999, tzinfo=timezone.utc)
         Clock._set_frozen(dt)
         self.assertEqual("2024-01-01 00:00:00.999", Clock.now_isodate())
@@ -236,9 +223,7 @@ class TestClock(unittest.TestCase):
     def test_format_isodate_with_aware_datetime(self):
         """`format_isodate` formats an aware datetime correctly."""
         dt = datetime(1927, 3, 27, 8, 15, 42, 123456, tzinfo=timezone.utc)
-        self.assertEqual(
-            "1927-03-27 08:15:42.123", Clock.format_isodate(dt)
-        )
+        self.assertEqual("1927-03-27 08:15:42.123", Clock.format_isodate(dt))
 
     def test_format_isodate_with_naive_datetime(self):
         """`format_isodate` accepts a naive datetime (treated as active tz).
@@ -247,9 +232,7 @@ class TestClock(unittest.TestCase):
         timezone, so we just verify the format.
         """
         dt = datetime(1927, 3, 27, 8, 15, 42, 123456)
-        self.assertEqual(
-            "1927-03-27 08:15:42.123", Clock.format_isodate(dt)
-        )
+        self.assertEqual("1927-03-27 08:15:42.123", Clock.format_isodate(dt))
 
     def test_format_isodate_rejects_non_datetime(self):
         """`format_isodate` raises ``AssertionError`` for non-datetime."""
@@ -300,9 +283,7 @@ class TestClock(unittest.TestCase):
 
     def test_offset_then_frozen_mode_switches_correctly(self):
         """Switching from offset to frozen mode pins the value."""
-        Clock._set_datetime(
-            datetime(2030, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
-        )
+        Clock._set_datetime(datetime(2030, 6, 1, 12, 0, 0, tzinfo=timezone.utc))
         frozen_at = datetime(2000, 1, 1, tzinfo=timezone.utc)
         Clock._set_frozen(frozen_at)
         self.assertEqual(frozen_at, Clock.now())
@@ -362,9 +343,7 @@ class TestClock(unittest.TestCase):
                     Clock._set_frozen(frozen_at)
                     Clock._reset()
                     Clock._set_datetime(
-                        datetime(
-                            2030, 6, 1, 12, 0, 0, tzinfo=timezone.utc
-                        )
+                        datetime(2030, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
                     )
                     Clock._reset()
             except BaseException as ex:

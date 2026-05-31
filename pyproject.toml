@@ -101,6 +101,10 @@ create = "biz.dfch.training_data.cli:app"
 
 [tool.black]
 line-length = 80
+# Match the project's supported Python range (requires-python = ">=3.11").
+# Without this, black may default to a target newer than the runtime can
+# parse, causing the AST safety check to fail.
+target-version = ["py311", "py312", "py313"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

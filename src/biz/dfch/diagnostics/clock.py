@@ -168,8 +168,7 @@ class Clock:
         dt = cls._ensure_aware(dt)
 
         return (
-            dt.strftime("%Y-%m-%d %H:%M:%S.")
-            + f"{dt.microsecond // 1000:03d}"
+            dt.strftime("%Y-%m-%d %H:%M:%S.") + f"{dt.microsecond // 1000:03d}"
         )
 
     @classmethod
