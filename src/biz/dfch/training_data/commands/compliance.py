@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'compliance-check' command."""
+"""'paragraph-audit' command."""
 
 from pathlib import Path
 
@@ -38,16 +38,40 @@ app = typer.Typer(
 
 
 @app.command()
-def compliance(
+def paragraph(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task05.jsonl",
+    file: NameArg = "task08.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 5: Compliance Verification of Correct Usage".
+    Make the dataset for "Task 8: Full Paragraph Compliance Audit".
 
-    Issue #5, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/5
+    Issue #8, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/8
+
+    Generates training examples that audit an entire paragraph for
+    ASD-STE100 compliance, listing each non-compliant token together
+    with the rule that was violated and a suggested rewrite.
+
+    Args:
+        ctx (typer.Context): The Typer context (unused; required so the
+            command integrates with the parent Typer application).
+        output (OutputArg): Directory in which the dataset file is
+            written. Must exist. Defaults to the current directory.
+        file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task08.jsonl"``.
+        overwrite (OverwriteArg): When ``True``, an existing output
+            file is replaced without prompting. When ``False`` and the
+            file exists, the user is asked for confirmation.
+
+    Raises:
+        AssertionError: If ``output`` is not a :class:`Path` or does
+            not exist on disk.
+        typer.Abort: If the output file exists and the user declines
+            to overwrite it.
+
+    Returns:
+        None: The dataset is written to disk as a side effect.
     """
 
     _ = ctx
@@ -66,7 +90,7 @@ def compliance(
             raise typer.Abort()
 
     log.debug(
-        "compliance_check: output=%s, file=%s, overwrite=%s",
+        "paragraph_audit: output=%s, file=%s, overwrite=%s",
         output,
         file,
         overwrite,

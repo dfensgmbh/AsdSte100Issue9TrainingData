@@ -48,6 +48,31 @@ def lexicon(
     Make the dataset for "Task 2: Explicit Lexicon Lookup (Word + POS Level)".
 
     Issue #2, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/2
+
+    Generates training examples that exercise direct dictionary-style
+    lookups against the ASD-STE100 vocabulary: given a word together
+    with its part of speech, the model must return the approval status
+    and any approved alternative(s).
+
+    Args:
+        ctx (typer.Context): The Typer context (unused; required so the
+            command integrates with the parent Typer application).
+        output (OutputArg): Directory in which the dataset file is
+            written. Must exist. Defaults to the current directory.
+        file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task02.jsonl"``.
+        overwrite (OverwriteArg): When ``True``, an existing output
+            file is replaced without prompting. When ``False`` and the
+            file exists, the user is asked for confirmation.
+
+    Raises:
+        AssertionError: If ``output`` is not a :class:`Path` or does
+            not exist on disk.
+        typer.Abort: If the output file exists and the user declines
+            to overwrite it.
+
+    Returns:
+        None: The dataset is written to disk as a side effect.
     """
 
     _ = ctx

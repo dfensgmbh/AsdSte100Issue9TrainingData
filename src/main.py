@@ -32,6 +32,9 @@ from biz.dfch.training_data.commands import restriction
 from biz.dfch.training_data.commands import rewrite
 from biz.dfch.training_data.commands import choice
 from biz.dfch.training_data.commands import query
+from biz.dfch.training_data.commands import grammar
+from biz.dfch.training_data.commands import verb
+from biz.dfch.training_data.commands import category
 
 
 from biz.dfch.training_data.info import Info
@@ -65,6 +68,9 @@ app.command(epilog=Info.epilog)(choice)
 app.command(epilog=Info.epilog)(restriction)
 app.command(epilog=Info.epilog)(paragraph)
 app.command(epilog=Info.epilog)(query)
+app.command(epilog=Info.epilog)(grammar)
+app.command(epilog=Info.epilog)(verb)
+app.command(epilog=Info.epilog)(category)
 
 
 if __name__ == "__main__":

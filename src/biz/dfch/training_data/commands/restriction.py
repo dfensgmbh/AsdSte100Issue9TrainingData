@@ -48,6 +48,30 @@ def restriction(
     Make the dataset for "Task 7: Restriction Reason Explanation".
 
     Issue #7, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/7
+
+    Generates training examples that ask the model to explain *why* a
+    particular word is restricted by ASD-STE100 and to point to the
+    approved alternative.
+
+    Args:
+        ctx (typer.Context): The Typer context (unused; required so the
+            command integrates with the parent Typer application).
+        output (OutputArg): Directory in which the dataset file is
+            written. Must exist. Defaults to the current directory.
+        file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task07.jsonl"``.
+        overwrite (OverwriteArg): When ``True``, an existing output
+            file is replaced without prompting. When ``False`` and the
+            file exists, the user is asked for confirmation.
+
+    Raises:
+        AssertionError: If ``output`` is not a :class:`Path` or does
+            not exist on disk.
+        typer.Abort: If the output file exists and the user declines
+            to overwrite it.
+
+    Returns:
+        None: The dataset is written to disk as a side effect.
     """
 
     _ = ctx

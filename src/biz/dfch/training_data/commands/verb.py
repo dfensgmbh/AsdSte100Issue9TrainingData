@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'word-choice' command."""
+"""'verb' command."""
 
 from pathlib import Path
 
@@ -38,20 +38,22 @@ app = typer.Typer(
 
 
 @app.command()
-def choice(
+def verb(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task06.jsonl",
+    file: NameArg = "task10.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 6: Word Choice Between Approved Synonyms".
+    Make the dataset for "Task 10: Approved Verb Lookup by Definition".
 
-    Issue #6, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/6
+    Issue #10,
+    https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/10
 
-    Generates training examples that ask the model to choose, among
-    several ASD-STE100 approved synonyms, the one that best fits a
-    given context and to justify the choice.
+    Generates training examples that help writers find the ASD-STE100
+    approved verb that matches a given natural-language definition,
+    together with an example sentence and the alternatives that must
+    not be used.
 
     Args:
         ctx (typer.Context): The Typer context (unused; required so the
@@ -59,7 +61,7 @@ def choice(
         output (OutputArg): Directory in which the dataset file is
             written. Must exist. Defaults to the current directory.
         file (NameArg): Name of the output JSONL file. Defaults to
-            ``"task06.jsonl"``.
+            ``"task10.jsonl"``.
         overwrite (OverwriteArg): When ``True``, an existing output
             file is replaced without prompting. When ``False`` and the
             file exists, the user is asked for confirmation.
@@ -89,8 +91,6 @@ def choice(
         if not overwrite:
             raise typer.Abort()
 
-    log.debug(
-        "word_choice: output=%s, file=%s, overwrite=%s", output, file, overwrite
-    )
+    log.debug("verb: output=%s, file=%s, overwrite=%s", output, file, overwrite)
 
     return

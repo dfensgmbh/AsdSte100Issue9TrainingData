@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'word-choice' command."""
+"""'category' command."""
 
 from pathlib import Path
 
@@ -38,20 +38,22 @@ app = typer.Typer(
 
 
 @app.command()
-def choice(
+def category(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task06.jsonl",
+    file: NameArg = "task11.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 6: Word Choice Between Approved Synonyms".
+    Make the dataset for "Task 11: Category-Based Word Restrictions".
 
-    Issue #6, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/6
+    Issue #11, 
+    https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/11
 
-    Generates training examples that ask the model to choose, among
-    several ASD-STE100 approved synonyms, the one that best fits a
-    given context and to justify the choice.
+    Generates training examples that explain why a word is rejected
+    based on general ASD-STE100 categories (for example "compound
+    verbs" or "helping verbs") and that name the approved direct verb
+    or alternative.
 
     Args:
         ctx (typer.Context): The Typer context (unused; required so the
@@ -59,7 +61,7 @@ def choice(
         output (OutputArg): Directory in which the dataset file is
             written. Must exist. Defaults to the current directory.
         file (NameArg): Name of the output JSONL file. Defaults to
-            ``"task06.jsonl"``.
+            ``"task11.jsonl"``.
         overwrite (OverwriteArg): When ``True``, an existing output
             file is replaced without prompting. When ``False`` and the
             file exists, the user is asked for confirmation.
@@ -90,7 +92,7 @@ def choice(
             raise typer.Abort()
 
     log.debug(
-        "word_choice: output=%s, file=%s, overwrite=%s", output, file, overwrite
+        "category: output=%s, file=%s, overwrite=%s", output, file, overwrite
     )
 
     return

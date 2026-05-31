@@ -107,6 +107,48 @@ def query(
 ):
     """
     Make the dataset for the "Query" task.
+
+    Runs an interactive ASD-STE100 query against a configured chat
+    model. The input text is tokenized and lemmatized with spaCy and
+    then sent to a :class:`LiteLlmAgent` that has access to the
+    :func:`get_word_status` tool. The agent must respond with a JSON
+    structure conforming to :class:`FinalResponse`, listing every word
+    together with a short summary and its ASD-STE100 status.
+
+    If ``text`` resolves to an existing file on disk, the file's
+    content is used as the input instead of the literal string.
+
+    Args:
+        ctx (typer.Context): The Typer context (unused; required so the
+            command integrates with the parent Typer application).
+        text (str): The input string to process, or a path to a UTF-8
+            text file whose contents will be used as the input.
+        url (str): Base URL of the chat completion service. May be
+            supplied through the ``CHAT_BASE_URL`` environment variable.
+        api_token (str): API token used to authenticate against the
+            chat service. May be supplied through the
+            ``CHAT_API_TOKEN`` environment variable.
+        model (str): Identifier of the chat model to use. May be
+            supplied through the ``CHAT_MODEL`` environment variable.
+        output (OutputArg): Directory in which the response JSON file
+            is written. Must exist. Defaults to the current directory.
+        file (NameArg): Name of the response file. When ``None``, a
+            timestamped file name of the form
+            ``response-YYYY-MM-DD---HH-MM-SS.json`` is generated.
+        overwrite (OverwriteArg): When ``True``, an existing response
+            file is replaced without prompting. When ``False`` and the
+            file exists, the user is asked for confirmation.
+
+    Raises:
+        AssertionError: If ``output`` is not a :class:`Path`, does not
+            exist, or if any of ``text``, ``url``, ``api_token`` or
+            ``model`` is empty or blank.
+        typer.Abort: If the output file exists and the user declines
+            to overwrite it.
+
+    Returns:
+        None: The agent's response is logged; persistence of the JSON
+        result is handled as a side effect.
     """
 
     _ = ctx

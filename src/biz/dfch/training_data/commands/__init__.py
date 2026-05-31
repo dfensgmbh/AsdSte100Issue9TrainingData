@@ -29,6 +29,9 @@ from .restriction import restriction
 from .rewrite import rewrite
 from .choice import choice
 from .query import query
+from .grammar import grammar
+from .verb import verb
+from .category import category
 
 __all__ = [
     "ambiguity",
@@ -43,4 +46,7 @@ __all__ = [
     "rewrite",
     "choice",
     "query",
+    "grammar",
+    "verb",
+    "category",
 ]

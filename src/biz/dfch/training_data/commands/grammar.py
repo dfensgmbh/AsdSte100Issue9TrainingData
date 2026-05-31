@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'word-choice' command."""
+"""'grammar' command."""
 
 from pathlib import Path
 
@@ -38,20 +38,21 @@ app = typer.Typer(
 
 
 @app.command()
-def choice(
+def grammar(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task06.jsonl",
+    file: NameArg = "task09.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 6: Word Choice Between Approved Synonyms".
+    Make the dataset for "Task 9: Internal Grammar Engine (POS Identification)".
 
-    Issue #6, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/6
+    Issue #9, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/9
 
-    Generates training examples that ask the model to choose, among
-    several ASD-STE100 approved synonyms, the one that best fits a
-    given context and to justify the choice.
+    Generates training examples that strengthen the model's internal
+    grammar engine by asking it to identify the part of speech of a
+    word inside a sentence and to derive the ASD-STE100 approval
+    verdict from that POS.
 
     Args:
         ctx (typer.Context): The Typer context (unused; required so the
@@ -59,7 +60,7 @@ def choice(
         output (OutputArg): Directory in which the dataset file is
             written. Must exist. Defaults to the current directory.
         file (NameArg): Name of the output JSONL file. Defaults to
-            ``"task06.jsonl"``.
+            ``"task09.jsonl"``.
         overwrite (OverwriteArg): When ``True``, an existing output
             file is replaced without prompting. When ``False`` and the
             file exists, the user is asked for confirmation.
@@ -90,7 +91,7 @@ def choice(
             raise typer.Abort()
 
     log.debug(
-        "word_choice: output=%s, file=%s, overwrite=%s", output, file, overwrite
+        "grammar: output=%s, file=%s, overwrite=%s", output, file, overwrite
     )
 
     return

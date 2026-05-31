@@ -52,7 +52,34 @@ def ambiguity(
     """
     Make the dataset for "Task 1: Ambiguity".
 
-    Issue #1, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/1
+    Issue #1, 
+    https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/1
+
+    Iterates over all words in the ASD-STE100 vocabulary and emits one
+    JSONL training example per approved usage example (both top-level
+    ``ste_example`` entries and per-meaning ``ste_example`` entries).
+    Each line is produced via :class:`STE100Approved` and contains the
+    sentence, the target word, and its part of speech.
+
+    Args:
+        ctx (typer.Context): The Typer context (unused; kept so the
+            command participates in the Typer application lifecycle).
+        output (OutputArg): Directory in which the dataset file is
+            written. Must exist. Defaults to the current directory.
+        file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task01.jsonl"``.
+        overwrite (OverwriteArg): When ``True``, an existing output
+            file is replaced without prompting. When ``False`` and the
+            file exists, the user is asked for confirmation.
+
+    Raises:
+        AssertionError: If ``output`` is not a :class:`Path` or does
+            not exist on disk.
+        typer.Abort: If the output file exists and the user declines
+            to overwrite it.
+
+    Returns:
+        None: The dataset is written to disk as a side effect.
     """
 
     _ = ctx
