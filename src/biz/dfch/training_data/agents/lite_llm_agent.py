@@ -22,31 +22,27 @@ import json
 import litellm
 from litellm import Message
 from typing import List, Callable, Type, Any
-from pydantic_ai import Agent
-from pydantic_ai.models.function import FunctionModel
 
-from pydantic_ai import Agent
 from pydantic_ai import (
+    Agent,
     ModelMessage,
     ModelRequest,
     ModelResponse,
-    TextPart,
     RequestUsage,
     ToolDefinition,
-)
-from pydantic_ai.models.function import FunctionModel, AgentInfo
-from pydantic_ai import (
+    RetryPromptPart,
     SystemPromptPart,
-    UserPromptPart,
+    TextPart,
     ToolReturnPart,
     ToolCallPart,
-    TextPart,
-    RetryPromptPart,
+    UserPromptPart,
 )
+from pydantic_ai.models.function import FunctionModel, AgentInfo
 
 from biz.dfch.logging import log
 
-class Ste100Agent:
+
+class LiteLlmAgent:
     """A pydantic-ai `Agent` that uses lite-llm to query providers."""
 
     _url: str
@@ -58,6 +54,7 @@ class Ste100Agent:
         url: str,
         api_key: str,
         model: str,
+        system_prompt: str | None = None,
     ) -> None:
 
         assert isinstance(url, str), type(url)
@@ -72,14 +69,15 @@ class Ste100Agent:
         self._api_key = api_key
 
         self.model = FunctionModel(self._litellm_bridge)
-        self.agent = Agent(
-            self.model,
-            system_prompt=(
-                "You are a helpful technical writer. "
-                "You MUST respond only in a valid JSON format. "
-                "Do not include any conversational text before or after the JSON block."
-            ),
-        )
+        if isinstance(system_prompt, str) and system_prompt.strip():
+            self.agent = Agent(
+                self.model,
+                system_prompt=system_prompt,
+            )
+        else:
+            self.agent = Agent(
+                self.model,
+            )
 
     def _litellm_bridge(
         self, messages: list[ModelMessage], info: AgentInfo
@@ -92,7 +90,7 @@ class Ste100Agent:
         c = -1
         for msg in messages:
             c += 1
-            log.debug(f"### [{c}] msg: '{msg}'.")
+            log.debug(f"[PYD {c}] '{msg}'")
 
             if isinstance(msg, ModelResponse):
 
@@ -100,7 +98,7 @@ class Ste100Agent:
                 content = ""
                 for part in msg.parts:
                     if isinstance(part, ToolCallPart):
-                        log.debug(f"ToolCallPart: '{part}'")
+                        log.debug(f"[PYD {c}:{type(part).__name__}<<<] {part}")
                         x = {
                             "id": part.tool_call_id,
                             "type": "function",
@@ -112,10 +110,14 @@ class Ste100Agent:
                         tool_calls.append(x)
                         continue
                     if isinstance(part, TextPart):
+                        log.debug(f"[PYD {c}:{type(part).__name__}<<<] {part}")
                         content = part.content
                         continue
-                    log.debug(f"{type(part)}: '{part}'")
-                    assert False, f"{type(part)}: '{part}'"
+
+                    # Catch all other parts.
+                    log.debug(f"[PYD {c}:{type(part).__name__}<<<] {part}")
+                    assert False, f"[PYD {c}:{type(part).__name__}<<<] {part}"
+
                 m = Message(
                     content=content,
                     role="assistant",
@@ -128,7 +130,7 @@ class Ste100Agent:
 
                 for part in msg.parts:
                     if isinstance(part, SystemPromptPart):
-                        log.debug(f"SystemPromptPart: '{part}'")
+                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
                         m = Message(
                             content=str(part.content),
                             role="system",
@@ -136,7 +138,7 @@ class Ste100Agent:
                         converted.append(m)
                         continue
                     if isinstance(part, UserPromptPart):
-                        log.debug(f"UserPromptPart: '{part}'")
+                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
                         m = Message(
                             content=str(part.content),
                             role="user",
@@ -144,7 +146,7 @@ class Ste100Agent:
                         converted.append(m)
                         continue
                     if isinstance(part, ToolReturnPart):
-                        log.debug(f"ToolReturnPart: '{part}'")
+                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
                         converted.append(
                             {  # type: ignore
                                 "role": "tool",
@@ -155,7 +157,7 @@ class Ste100Agent:
                         )
                         continue
                     if isinstance(part, RetryPromptPart):
-                        log.debug(f"RetryPromptPart: '{part}'")
+                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
                         converted.append(
                             {  # type: ignore
                                 "role": "tool",
@@ -165,17 +167,19 @@ class Ste100Agent:
                             }
                         )
                         continue
-                    log.debug(f"{type(part)}: '{part}'")
-                    assert False, f"{type(part)}: '{part}'"
+
+                    # Catch all other parts.
+                    log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
+                    assert False, f"[PYD {c}:{type(part).__name__}>>>] {part}"
 
         def _convert_tool(tool: ToolDefinition) -> dict:
             result = {
-                    "type": "function",
-                    "function": {
-                        "name": tool.name,
-                        "description": tool.description,
-                        "parameters": tool.parameters_json_schema,
-                    },
+                "type": "function",
+                "function": {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.parameters_json_schema,
+                },
             }
             return result
 
@@ -185,10 +189,10 @@ class Ste100Agent:
 
         for t in tools:
             log.debug(f"tool: '{t}'.")
-        for x in self.agent.toolsets:
-            log.debug(f"toolset: [{type(x)}] {x}")
-        for msg in converted:
-            log.debug(f"msg: '{msg}'.")
+        # for x in self.agent.toolsets:
+        #     log.debug(f"toolset: [{type(x)}] {x}")
+        for c, msg in enumerate(converted):
+            log.debug(f"[LTE {c}] {msg}")
 
         response = litellm.completion(
             model=f"openai/{self._model}",
@@ -245,7 +249,7 @@ class Ste100Agent:
         prompt: str,
         *,
         deps: Any | None = None,
-        output_type: Type[Any] | None = None
+        output_type: Type[Any] | None = None,
     ):
         """Start the query with optional output type."""
         return self.agent.run_sync(prompt, deps=deps, output_type=output_type)
