@@ -32,8 +32,19 @@ class StringBuilder:
 
     _lines: list[str]
 
-    def __init__(self) -> None:
+    def __init__(self, value: str = "") -> None:
+        """Initializes a new instance of the :class:`StringBuilder` class.
+
+        Args:
+            value (str): The initial value of the builder. Defaults to
+                an empty string.
+        """
+
+        assert isinstance(value, str), type(value)
+
         self._lines = []
+        if value:
+            self._lines.append(value)
 
     def clear(self) -> StringBuilder:
         """Removes all characters from the current instance.
@@ -110,6 +121,102 @@ class StringBuilder:
         joined = "".join(self._lines)
         replaced = joined.replace(old_value, new_value)
         self._lines = [replaced]
+
+        return self
+
+    def format(self, format_string: str, *args: object) -> StringBuilder:
+        """Appends a formatted string to this instance.
+
+        The format string uses ``printf``-style ``%`` placeholders
+        (for example ``%s``, ``%d``, ``%.2f``) and is evaluated against
+        the supplied positional arguments.
+
+        Args:
+            format_string (str): A ``%``-style format string.
+            *args (object): Values to substitute into
+                ``format_string``.
+
+        Returns:
+            StringBuilder: This instance, to allow method chaining.
+
+        Raises:
+            TypeError: If ``format_string`` does not match the number
+                or type of ``args``.
+        """
+
+        assert isinstance(format_string, str), type(format_string)
+
+        if args:
+            formatted = format_string % args
+        else:
+            formatted = format_string
+
+        self._lines.append(formatted)
+
+        return self
+
+    def join(self, other: StringBuilder) -> StringBuilder:
+        """Appends the contents of another :class:`StringBuilder` 
+        to this instance.
+
+        The source instance is not modified.
+
+        Args:
+            other (StringBuilder): The builder whose contents are
+                appended to this instance.
+
+        Returns:
+            StringBuilder: This instance, to allow method chaining.
+        """
+
+        assert isinstance(other, StringBuilder), type(other)
+
+        if other is self:
+            snapshot = other.to_string()
+            if snapshot:
+                self._lines.append(snapshot)
+            return self
+
+        # pylint: disable=W0212
+        self._lines.extend(other._lines)
+
+        return self
+
+    def insert(self, index: int, value: str) -> StringBuilder:
+        """Inserts a string into this instance at the specified position.
+
+        Args:
+            index (int): The zero-based position at which ``value`` is
+                inserted. Must be between ``0`` and the current length
+                of this instance, inclusive. An ``index`` equal to the
+                current length appends ``value`` at the end.
+            value (str): The string to insert.
+
+        Returns:
+            StringBuilder: This instance, to allow method chaining.
+
+        Raises:
+            ValueError: If ``index`` is negative or greater than the
+                current length of this instance.
+        """
+
+        assert isinstance(index, int), type(index)
+        assert isinstance(value, str), type(value)
+
+        if index < 0:
+            raise ValueError(f"'index' must not be negative: {index}.")
+
+        joined = "".join(self._lines)
+        if index > len(joined):
+            raise ValueError(
+                "'index' exceeds the current length: "
+                f"{index} > {len(joined)}."
+            )
+
+        if not value:
+            return self
+
+        self._lines = [joined[:index] + value + joined[index:]]
 
         return self
 
