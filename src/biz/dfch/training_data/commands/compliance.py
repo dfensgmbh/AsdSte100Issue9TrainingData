@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""'paragraph-audit' command."""
+"""'compliance-check' command."""
 
 from pathlib import Path
 
@@ -38,28 +38,28 @@ app = typer.Typer(
 
 
 @app.command()
-def paragraph(
+def compliance(
     ctx: typer.Context,
     output: OutputArg = Path("."),
-    file: NameArg = "task08.jsonl",
+    file: NameArg = "task05.jsonl",
     overwrite: OverwriteArg = False,
 ):
     """
-    Make the dataset for "Task 8: Full Paragraph Compliance Audit".
+    Make the dataset for "Task 5: Compliance Verification of Correct Usage".
 
-    Issue #8, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/8
+    Issue #5, https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/5
 
-    Generates training examples that audit an entire paragraph for
-    ASD-STE100 compliance, listing each non-compliant token together
-    with the rule that was violated and a suggested rewrite.
+    Generates training examples that ask the model to verify whether a
+    given sentence already conforms to ASD-STE100 rules, and to justify
+    the verdict (approved usage, approved POS, no restricted vocabulary).
 
     Args:
         ctx (typer.Context): The Typer context (unused; required so the
             command integrates with the parent Typer application).
         output (OutputArg): Directory in which the dataset file is
             written. Must exist. Defaults to the current directory.
-        file (NameArg): Name of the output JSONL file. Defaults to
-            ``"task08.jsonl"``.
+                file (NameArg): Name of the output JSONL file. Defaults to
+            ``"task05.jsonl"``.
         overwrite (OverwriteArg): When ``True``, an existing output
             file is replaced without prompting. When ``False`` and the
             file exists, the user is asked for confirmation.
@@ -89,11 +89,11 @@ def paragraph(
         if not overwrite:
             raise typer.Abort()
 
-    log.debug(
-        "paragraph_audit: output=%s, file=%s, overwrite=%s",
-        output,
-        file,
-        overwrite,
-    )
+        log.debug(
+            "compliance_check: output=%s, file=%s, overwrite=%s",
+            output,
+            file,
+            overwrite,
+        )
 
     return
