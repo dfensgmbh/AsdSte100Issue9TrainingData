@@ -1,0 +1,170 @@
+AsdSte100Issue9TrainingData
+Copyright (C) 2026 Ronald Rink, d-fens GmbH (https://d-fens.ch)
+
+This product is licensed under the GNU Affero General Public License,
+version 3 or any later version (AGPL-3.0-or-later). See the LICENSE
+file in the project root for the full license text, or visit
+https://www.gnu.org/licenses/agpl-3.0 for an authoritative copy.
+
+--------------------------------------------------------------------
+DIRECT DEPENDENCIES
+--------------------------------------------------------------------
+
+This software incorporates the following third-party libraries.
+Each library is distributed under its own license. The version
+constraints below match those declared in ``pyproject.toml`` at the
+time this NOTICE was written; consult the project lockfile
+(``uv.lock``) for the exact resolved versions installed in a given
+environment.
+
+# biz-dfch-ste100vocab
+
+License: AGPL-3.0-or-later
+PyPI: https://pypi.org/project/biz-dfch-ste100vocab/
+Used as: ASD-STE100 vocabulary lookup.
+Required: >=0.5.0
+
+# dacite
+
+License: MIT
+Home: https://github.com/konradhalas/dacite
+PyPI: https://pypi.org/project/dacite/
+Used as: Data class construction from dictionaries.
+Required: >=1.9.2
+
+# en-core-web-sm (spaCy English model)
+
+License: MIT
+Home: https://explosion.ai
+Release: https://github.com/explosion/spacy-models/releases/tag/en_core_web_sm-3.8.0
+Used as: spaCy small English pipeline for tokenisation and lemmatisation.
+Required: pinned to 3.8.0 via direct URL.
+
+# instructor
+
+License: MIT
+PyPI: https://pypi.org/project/instructor/
+Used as: Structured-output helpers for LLM clients.
+Required: >=1.15.0
+
+# litellm
+
+License: MIT
+PyPI: https://pypi.org/project/litellm/
+Used as: Unified chat-completion client across multiple model providers.
+Required: >=1.86.2
+
+# pydantic
+
+License: MIT
+PyPI: https://pypi.org/project/pydantic/
+Used as: Data validation and settings management.
+Required: >=2.10.0
+
+# pydantic-ai
+
+License: MIT
+PyPI: https://pypi.org/project/pydantic-ai/
+Used as: LLM agent framework with tool-calling and structured output.
+Required: >=1.104.0
+
+# python-dotenv
+
+License: BSD-3-Clause
+PyPI: https://pypi.org/project/python-dotenv/
+Used as: ``.env`` file loading.
+Required: >=1.2.2
+
+# requests
+
+License: Apache-2.0
+PyPI: https://pypi.org/project/requests/
+Used as: HTTP client.
+Required: >=2.34.2
+
+# rich
+
+License: MIT
+PyPI: https://pypi.org/project/rich/
+Used as: Rich terminal formatting and logging.
+Required: >=14.0.0
+
+# spacy
+
+License: MIT
+Home: https://spacy.io
+PyPI: https://pypi.org/project/spacy/
+Used as: Natural-language processing pipeline.
+Required: >=3.8.14
+
+# typer
+
+License: MIT
+PyPI: https://pypi.org/project/typer/
+Used as: Command-line interface framework.
+Required: >=0.26.3
+
+--------------------------------------------------------------------
+OPTIONAL / DEVELOPMENT DEPENDENCIES
+--------------------------------------------------------------------
+
+The following packages are not required at runtime but are pulled in
+by the project's optional extras (``test``, ``dev``, ``interactive``,
+``build``) declared in ``pyproject.toml``:
+
+  * coverage                  (Apache-2.0)
+  * parameterized >=0.9.0     (BSD-3-Clause)
+  * pylint        >=4.0.0     (GPL-2.0-or-later)
+  * black                     (MIT)
+  * flake8        >=7.3.0     (MIT)
+  * pip           >=26.1.1    (MIT)
+  * ipykernel                 (BSD-3-Clause)
+  * pyinstaller   >=6.20.0    (GPL-2.0-or-later with bootloader exception)
+
+These tools are used only during development, testing, packaging or
+interactive work, and are not distributed as part of the runtime
+application itself.
+
+--------------------------------------------------------------------
+TRANSITIVE DEPENDENCIES
+--------------------------------------------------------------------
+
+The libraries listed above pull in further transitive dependencies
+(for example, ``httpx``, ``openai``, ``anthropic``, ``cohere``,
+``litellm``-provider SDKs, ``numpy``, ``thinc`` and the rest of the
+spaCy stack, OpenTelemetry libraries used by ``logfire``/
+``pydantic-ai``, etc.). Each such transitive dependency is
+distributed under its own license.
+
+To obtain the full, exact list of every package resolved into a
+particular install, along with the license declared in its metadata,
+run any of the following from an environment where this project has
+been installed:
+
+    uv pip list
+    uv pip show <package-name>
+    python -m pip show <package-name>
+
+or inspect ``uv.lock`` in the project root.
+
+--------------------------------------------------------------------
+LICENSE TEXTS
+--------------------------------------------------------------------
+
+This NOTICE summarises the licenses of the dependencies above; it
+does not reproduce their full license texts. The full license text
+of each dependency is shipped with its distribution and is also
+available from the project's home page or PyPI listing referenced
+in the entry. In particular:
+
+  * The full text of the GNU Affero General Public License v3.0 (the
+    license that covers this project itself, as well as the
+    ``biz-dfch-ste100vocab`` dependency) is provided in the file
+    ``LICENSE`` in the project root.
+  * The MIT, BSD-3-Clause and Apache-2.0 license texts are
+    well-known standard texts. Canonical copies are available from
+    https://opensource.org/licenses.
+
+If you redistribute this software you are required to comply with
+the terms of the AGPL-3.0-or-later as well as with the license terms
+of every dependency that ends up bundled in your distribution.

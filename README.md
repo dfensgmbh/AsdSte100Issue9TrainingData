@@ -15,20 +15,20 @@ file for every command is a JSON Lines file named
 `taskNN.jsonl` in the current working directory; pass `--output` and
 `--file` to override.
 
-| Command | Task | Default output | GitHub issue | Status |
-| --- | --- | --- | --- | --- |
-| `ambiguity` | Task 1: Ambiguity | `task01.jsonl` | [#1](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/1) | Stub |
-| `lexicon` | Task 2: Explicit Lexicon Lookup (Word + POS Level) | `task02.jsonl` | [#2](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/2) | Stub |
-| `pos` | Task 3: POS Identification in Context | `task03.jsonl` | [#3](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/3) | Stub |
-| `rewrite` | Task 4: Sentence Rewriting for Compliance | `task04.jsonl` | [#4](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/4) | Stub |
-| `compliance` | Task 5: Compliance Verification of Correct Usage | `task05.jsonl` | [#5](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/5) | Stub |
-| `choice` | Task 6: Word Choice Between Approved Synonyms | `task06.jsonl` | [#6](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/6) | Stub |
-| `restriction` | Task 7: Restriction Reason Explanation | `task07.jsonl` | [#7](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/7) | Stub |
-| `paragraph` | Task 8: Full Paragraph Compliance Audit | `task08.jsonl` | [#8](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/8) | Stub |
-| `grammar` | Task 9: Internal Grammar Engine (POS Identification) | `task09.jsonl` | [#9](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/9) | Stub |
-| `verb` | Task 10: Approved Verb Lookup by Definition | `task10.jsonl` | [#10](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/10) | Stub |
-| `category` | Task 11: Category-Based Word Restrictions | `task11.jsonl` | [#11](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/11) | Stub |
-| `query` | Interactive ASD-STE100 query against a chat model (`response-<timestamp>.json`) | — | — | **Working** (only command currently implemented) |
+| Command | Task | Default output | Status |
+| --- | --- | --- | --- |
+| `ambiguity` | Task 1: Ambiguity ([#1](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/1)) | `task01.jsonl` | Stub |
+| `lexicon` | Task 2: Explicit Lexicon Lookup (Word + POS Level) ([#2](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/2)) | `task02.jsonl` | Stub |
+| `pos` | Task 3: POS Identification in Context ([#3](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/3)) | `task03.jsonl` | Stub |
+| `rewrite` | Task 4: Sentence Rewriting for Compliance ([#4](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/4)) | `task04.jsonl` | Stub |
+| `compliance` | Task 5: Compliance Verification of Correct Usage ([#5](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/5)) | `task05.jsonl` | Stub |
+| `choice` | Task 6: Word Choice Between Approved Synonyms ([#6](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/6)) | `task06.jsonl` | Stub |
+| `restriction` | Task 7: Restriction Reason Explanation ([#7](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/7)) | `task07.jsonl` | Stub |
+| `paragraph` | Task 8: Full Paragraph Compliance Audit ([#8](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/8)) | `task08.jsonl` | Stub |
+| `grammar` | Task 9: Internal Grammar Engine (POS Identification) ([#9](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/9)) | `task09.jsonl` | Stub |
+| `verb` | Task 10: Approved Verb Lookup by Definition ([#10](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/10)) | `task10.jsonl` | Stub |
+| `category` | Task 11: Category-Based Word Restrictions ([#11](https://github.com/dfensgmbh/AsdSte100Issue9TrainingData/issues/11)) | `task11.jsonl` | Stub |
+| `query` | Interactive ASD-STE100 query against a chat model | `response-<timestamp>.json` | **Working** (only command currently implemented) |
 
 ### Progress
 
