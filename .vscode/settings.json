@@ -20,7 +20,9 @@
         "pylint",
         "PYTHONIOENCODING",
         "setuptools",
-        "typer"
+        "spacy",
+        "typer",
+        "usecwd"
     ],
     "python.testing.unittestArgs": [
         "-v",
