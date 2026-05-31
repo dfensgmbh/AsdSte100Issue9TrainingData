@@ -163,14 +163,6 @@ def query(
 
     log.info(json.dumps(FinalResponse.model_json_schema(), indent=2))
 
-    nlp = spacy.load("en_core_web_sm", disable=["ner", "parser"])
-
-    doc = nlp(text)
-
-    for token in doc:
-        log.info(f"{token.text:12} -> {token.lemma_}")
-    # return
-
     if file is None:
         file = f"response-{datetime.now().strftime('%Y-%m-%d---%H-%M-%S')}.json"
 
@@ -214,8 +206,6 @@ def query(
         ]
     )
 
-    v = Vocab()
-    deps = RunCtxDeps(vocab=v, nlp=nlp)
     sw = Stopwatch()
     log.debug("Query LLM ...")
     sw.start()

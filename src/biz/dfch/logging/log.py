@@ -83,7 +83,6 @@ for _stream in (sys.stdout, sys.stderr):
         pass
 
 try:
-    print(get_project_src() / _LOGGER_FILE)
     logging.config.fileConfig(get_project_src() / _LOGGER_FILE)
     log = logging.getLogger(_LOGGER_NAME)  # type: ignore
 
