@@ -17,12 +17,12 @@
 
 """training_data module."""
 
-from .word_tools import get_etymology
+from .word_tools import get_word_alternative
 from .word_tools import get_word_status
 from .word_tools import RunCtxDeps
 
 __all__ = [
-    "get_etymology",
+    "get_word_alternative",
     "get_word_status",
     "RunCtxDeps",
 ]

@@ -146,11 +146,25 @@ def get_word_status(ctx: RunContext[None], word: str) -> str:
     return result
 
 
-def get_etymology(ctx: RunContext[None], word: str) -> str:
+def get_word_alternative(ctx: RunContext[None], word: str) -> str:
     """Find the origin of a word."""
+
+    assert isinstance(ctx, RunContext), type(ctx)
+    assert ctx.deps is not None
+    assert ctx.deps.vocab is not None
+    assert ctx.deps.nlp is not None
+
+    result: StringBuilder = StringBuilder()
+
+    if word is None or not word.strip():
+        result.write("")
 
     _ = ctx
 
-    log.error(f"#### tool_call: get_etymology(word = '{word}').")
+    log.debug(f"#### tool_call: get_word_alternative(word = '{word}').")
+
+    v = ctx.deps.vocab
+    assert isinstance(v, Vocab), type(v)
+    words = v.find(word)
 
     return f"The word {word} comes from Latin."
