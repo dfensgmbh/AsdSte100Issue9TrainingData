@@ -15,7 +15,6 @@
 
 """'query' command."""
 
-from datetime import datetime
 import json
 from pathlib import Path
 from typing import Annotated
@@ -28,7 +27,7 @@ import spacy
 from biz.dfch.asdste100vocab import Vocab
 
 from biz.dfch.logging import log
-from biz.dfch.diagnostics import Stopwatch
+from biz.dfch.diagnostics import Clock, Stopwatch
 
 
 from ..agents.lite_llm_agent import LiteLlmAgent
@@ -164,7 +163,7 @@ def query(
     log.info(json.dumps(FinalResponse.model_json_schema(), indent=2))
 
     if file is None:
-        file = f"response-{datetime.now().strftime('%Y-%m-%d---%H-%M-%S')}.json"
+        file = f"response-{Clock.now_file()}.json"
 
     path = Path(output / file).resolve()
 
@@ -196,7 +195,7 @@ def query(
 
     word_tools = WordTools(
         vocab=Vocab(),
-        nlp=spacy.load("en_core_web_sm", disable=["ner", "parser"])
+        nlp=spacy.load("en_core_web_sm", disable=["ner", "parser"]),
     )
 
     agent.add_tools(
