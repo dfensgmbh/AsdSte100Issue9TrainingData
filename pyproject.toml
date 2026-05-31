@@ -110,6 +110,28 @@ target-version = ["py311", "py312", "py313"]
 where = ["src"]
 namespaces = true
 
+[tool.mypy]
+# Match the lowest supported Python (requires-python = ">=3.11").
+python_version = "3.11"
+# The package lives under src/ as a PEP 420 namespace package.
+# Without these settings mypy confuses `src/biz/dfch/logging/__init__.py`
+# with the stdlib `logging` module.
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+# Many of our third-party deps (spacy, litellm, instructor, typer, etc.)
+# ship without type stubs. Silence those rather than annotating each one.
+ignore_missing_imports = true
+follow_imports = "silent"
+# Lenient starting posture - tighten gradually as annotations are added.
+disallow_untyped_defs = false
+check_untyped_defs = false
+# Many existing `# type: ignore` comments are intentionally kept so that
+# they remain useful once mypy is tightened (e.g. check_untyped_defs=true,
+# disallow_untyped_defs=true). Disable the warning for now.
+warn_unused_ignores = false
+warn_redundant_casts = true
+
 [[tool.mypy.overrides]]
 module = ["parameterized.*"]
 ignore_missing_imports = true

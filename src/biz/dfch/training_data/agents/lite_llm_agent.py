@@ -87,6 +87,9 @@ class LiteLlmAgent:
         assert isinstance(info, AgentInfo), type(info)
 
         converted: list[Message] = []
+        # Explicitly annotate `m` so mypy does not narrow its type across
+        # the ModelResponse / ModelRequest branches below.
+        m: Message
         c = -1
         for msg in messages:
             c += 1
@@ -128,49 +131,68 @@ class LiteLlmAgent:
 
             if isinstance(msg, ModelRequest):
 
-                for part in msg.parts:
-                    if isinstance(part, SystemPromptPart):
-                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
+                # Use a distinct loop variable name to avoid mypy carrying
+                # forward the narrower union type from the ModelResponse
+                # branch's `for part in msg.parts` loop above.
+                for req_part in msg.parts:
+                    if isinstance(req_part, SystemPromptPart):
+                        log.debug(
+                            f"[PYD {c}:{type(req_part).__name__}>>>] "
+                            f"{req_part}"
+                        )
                         m = Message(
-                            content=str(part.content),
+                            content=str(req_part.content),
                             role="system",
                         )
                         converted.append(m)
                         continue
-                    if isinstance(part, UserPromptPart):
-                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
+                    if isinstance(req_part, UserPromptPart):
+                        log.debug(
+                            f"[PYD {c}:{type(req_part).__name__}>>>] "
+                            f"{req_part}"
+                        )
                         m = Message(
-                            content=str(part.content),
+                            content=str(req_part.content),
                             role="user",
                         )
                         converted.append(m)
                         continue
-                    if isinstance(part, ToolReturnPart):
-                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
+                    if isinstance(req_part, ToolReturnPart):
+                        log.debug(
+                            f"[PYD {c}:{type(req_part).__name__}>>>] "
+                            f"{req_part}"
+                        )
                         converted.append(
                             {  # type: ignore
                                 "role": "tool",
-                                "tool_call_id": part.tool_call_id,
-                                "name": part.tool_name,
-                                "content": json.dumps(part.content),
+                                "tool_call_id": req_part.tool_call_id,
+                                "name": req_part.tool_name,
+                                "content": json.dumps(req_part.content),
                             }
                         )
                         continue
-                    if isinstance(part, RetryPromptPart):
-                        log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
+                    if isinstance(req_part, RetryPromptPart):
+                        log.debug(
+                            f"[PYD {c}:{type(req_part).__name__}>>>] "
+                            f"{req_part}"
+                        )
                         converted.append(
                             {  # type: ignore
                                 "role": "tool",
-                                "tool_call_id": part.tool_call_id,
-                                "name": part.tool_name,
-                                "content": json.dumps(part.content),
+                                "tool_call_id": req_part.tool_call_id,
+                                "name": req_part.tool_name,
+                                "content": json.dumps(req_part.content),
                             }
                         )
                         continue
 
                     # Catch all other parts.
-                    log.debug(f"[PYD {c}:{type(part).__name__}>>>] {part}")
-                    assert False, f"[PYD {c}:{type(part).__name__}>>>] {part}"
+                    log.debug(
+                        f"[PYD {c}:{type(req_part).__name__}>>>] {req_part}"
+                    )
+                    assert (
+                        False
+                    ), f"[PYD {c}:{type(req_part).__name__}>>>] {req_part}"
 
         def _convert_tool(tool: ToolDefinition) -> dict:
             result = {
@@ -189,10 +211,12 @@ class LiteLlmAgent:
 
         for t in tools:
             log.debug(f"tool: '{t}'.")
-        # for x in self.agent.toolsets:
-        #     log.debug(f"toolset: [{type(x)}] {x}")
-        for c, msg in enumerate(converted):
-            log.debug(f"[LTE {c}] {msg}")
+        # Rename the loop variables to avoid colliding with the outer
+        # `for msg in messages` (which has type ModelMessage) - otherwise
+        # mypy reports an incompatible assignment when iterating over
+        # `converted` (which has type list[Message]).
+        for lte_i, lte_msg in enumerate(converted):
+            log.debug(f"[LTE {lte_i}] {lte_msg}")
 
         response = litellm.completion(
             model=f"openai/{self._model}",
@@ -209,8 +233,11 @@ class LiteLlmAgent:
         log.debug(f"response: '{response}'.")
         choice = response.choices[0]  # type: ignore
         finish_reason = choice.finish_reason  # type: ignore
-        message: Message = choice.message
-        parts = []
+        message: Message = choice.message  # type: ignore[assignment]
+        # `parts` holds a mix of TextPart and ToolCallPart entries; without
+        # the explicit annotation mypy infers list[TextPart] from the first
+        # append and rejects later ToolCallPart appends.
+        parts: list[TextPart | ToolCallPart] = []
 
         if finish_reason == "tool_calls":
             if message.content:
@@ -219,6 +246,10 @@ class LiteLlmAgent:
 
             assert message.tool_calls is not None
             for tc in message.tool_calls:
+                # LiteLLM types tc.function.name as Optional[str]; ToolCallPart
+                # requires a concrete str. In practice it is always populated
+                # for finish_reason == "tool_calls".
+                assert tc.function.name is not None
                 pc = ToolCallPart(
                     tool_call_id=tc.id,
                     tool_name=tc.function.name,
