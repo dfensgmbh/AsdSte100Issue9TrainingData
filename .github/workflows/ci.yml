@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv (with cache)
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            uv.lock
+            pyproject.toml
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --extra dev --python ${{ matrix.python-version }}
+
+      - name: Lint (pylint)
+        run: uv run pylint $(git ls-files '*.py')
+
+      - name: Lint (flake8)
+        run: uv run flake8 src tests
+
+      - name: Format check (black)
+        run: uv run black --check .
+
+      - name: Type check (mypy)
+        run: uv run mypy src tests
+
+      - name: Security scan (bandit)
+        run: uv run bandit -r src -ll
+
+      - name: Dependency vulnerability audit (pip-audit)
+        # --skip-editable: do not try to look up our own local package on PyPI
+        # --strict: also fail on warnings (e.g. skipped deps)
+        # Add `--ignore-vuln GHSA-xxxx` entries for vulns we explicitly accept.
+        run: uv run pip-audit --strict --skip-editable
+
+      # Optional: run all pre-commit hooks in CI to enforce that contributors
+      # actually executed them locally before pushing. This is somewhat
+      # redundant with the explicit lint/format/type steps above (black,
+      # flake8, pylint, mypy are all configured in .pre-commit-config.yaml),
+      # but it additionally enforces the hygiene hooks (trailing whitespace,
+      # EOL, YAML/TOML syntax, large-file guard, etc.).
+      # Enable later if you want a single source of truth for code quality.
+      # - name: Run pre-commit
+      #   run: uv run pre-commit run --all-files --show-diff-on-failure
+
+      - name: Run tests with coverage
+        run: |
+          uv run coverage run -m unittest discover -v -s tests -t . -p "test_*.py"
+          uv run coverage report -m
+          uv run coverage xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: warn
+
+  build:
+    runs-on: ubuntu-24.04
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv (with cache)
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            uv.lock
+            pyproject.toml
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Build distribution
+        run: uv build
