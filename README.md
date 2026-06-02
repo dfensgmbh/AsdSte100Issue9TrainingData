@@ -45,3 +45,306 @@ up in the ASD-STE100 vocabulary, and is required to return a JSON
 response listing every word together with a short summary and its
 ASD-STE100 status.
 
+# Train the model
+
+Here are the steps that I use to train the model with the training data on a system with NVIDIA GPUs:
+
+* Dataset is on [HuggingFace](https://huggingface.co/)
+* Model is on [HuggingFace](https://huggingface.co/)
+* Preparation
+* [NVIDIA-NeMo AutoModel](https://github.com/NVIDIA-NeMo/Automodel) fine-tunes the model to the HF format
+* [llama.cpp](https://github.com/ggml-org/llama.cpp) convert the consolidated HF model to GGUF
+* [llama.cpp](https://github.com/ggml-org/llama.cpp) quantises the GGUF model (examples: `Q4_K_M`, `Q5_K_M`, `Q6_K`, `Q8_0`)
+
+## Requirements
+
+This is the system configuration that I use (`SYS0`). There *may* be other or better configurations that work, too.
+
+* Intel w9 x86_64, 60 cores, 512 GB RAM
+* 4 * NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation (300 W), each 96 GB VRAM
+* more than 1 TB of free disk space
+* Docker, docker compose
+* Ubuntu 24.04 LTS
+* NVIDIA open-drivers, driver version v595.71.05, CUDA version v13.2
+
+NOTE: This also works on my small NVIDIA DGX Spark system (`DGX`) - but much slower.
+
+## Dataset
+
+Because we use `AutoModel` you must create the dataset on [HuggingFace](https://huggingface.co/). A free account is sufficient. The dataset name has this format: `organisation/dataset-name`.
+
+## Model
+
+Again, because we use `AutoModel` you must use a model from [HuggingFace](https://huggingface.co/). For this example, use [`Qwen/Qwen3-8B`](https://huggingface.co/Qwen/Qwen3-8B).
+
+## Preparation
+
+### Docker and NVIDIA
+
+* Install docker in `rootless` mode.
+* Install the NVIDIA toolkit directly from the NVIDIA repository.
+* Test the configuration with the [Hello, world! container](https://hub.docker.com/_/hello-world/) and the [Running a sample workload with Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/sample-workload.html#running-a-sample-workload-with-docker):
+
+```
+sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
+```
+
+### HuggingFace API token
+
+You must have an `HF_TOKEN` (an HuggingFace API token). We use it:
+
+* inside the `AutoModel` container, when we download the dataset and the model
+* on `SYS0`, when we upload the dataset
+
+```
+export HF_TOKEN=hf_your_token
+```
+
+NOTE: you *COULD* also set it as an environment variable in your `docker-compose.yaml`.
+
+### NVIDIA NeMo AutoModel container
+
+* The code for [NVIDIA-NeMo AutoModel](https://github.com/NVIDIA-NeMo/Automodel) is on GitHub, but it does not install on my system (not on `SYS0` and not on `DGX`). There are incompatibilities between `PyTorch`, CUDA and others that I cannot resolve. 
+
+* Therefore, use the [nemo-automodel:26.04](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo-automodel/tags?version=26.04) container:
+
+    ```
+    docker pull nvcr.io/nvidia/nemo-automodel:26.04
+    ```
+
+* All `AutoModel` executables are already installed in `/opt/Automodel/`.
+
+### Directories
+
+* The most important directory in `AutoModel` for us is the `checkpoints` directory. `AutoModel` records the data of checkpoints here: `/opt/Automodel/checkpoints/`.
+
+* `AutoModel` downloads the model and dataset when it does not find it in the cache file.
+
+* Make sure that `Docker` (as `root`) and your `$USER` have access to the mapped directories. Use `chown -R ...` to get access without `sudo`.
+
+
+### `docker-compose.yaml`
+
+* On `SYS0` create a folder `automodel`:
+
+    ```
+    mkdir -p ~/docker/automodel
+    ```
+
+* Then, create the file `docker-compose.yaml`:
+
+    ```
+    nano ~/docker/automodel/docker-compose.yaml
+    ```
+
+* This is the content of the file `docker-compose.yaml`:
+
+    ```
+    services:
+    automodel:
+        image: nvcr.io/nvidia/nemo-automodel:26.04
+        container_name: automodel
+        user: "0:0"
+        volumes:
+        - /data/automodel/checkpoints:/opt/Automodel/checkpoints
+        - /data/nvidia/workspace:/workspace
+        # TODO - examine the volume mappings.
+        - /data/nvidia/models:/models
+        - /data/nvidia/datasets:/datasets
+        - /data/nvidia/results:/results
+        - /data/nvidia/hf_cache:/root/.cache/huggingface
+        working_dir: /workspace
+        ipc: host
+        ulimits:
+        memlock: -1
+        stack: 67108864
+        deploy:
+        resources:
+            reservations:
+            devices:
+                - driver: nvidia
+                count: all
+                capabilities: [gpu]
+        tty: true
+        stdin_open: true
+        entrypoint: /usr/bin/bash
+        environment:
+        - TRANSFORMER_ENGINE_PTE=1
+        - NVIDIA_VISIBLE_DEVICES=all
+        # Optional, but then you have to restrict access to your configuration file:
+        - HF_TOKEN=hf_your_token
+    ```
+
+* You find the configuration file [here](./configuration/docker-compose.yaml).
+
+* Start the container in `~/docker/automodel` with:
+
+    ```
+    docker compose up -d
+    ```
+
+### Recipe
+
+* `Automodel` has example recipes in `/opt/Automodel/examples`. We can copy our example to this folder or specify the location of the 
+
+* You find the recipie for the example model [here](./configuration/qwen3_8b-asd-ste100.yaml).
+
+### `llama.cpp`
+
+* Install `cmake` if necessary:
+
+    ```
+    sudo apt-get install -y cmake
+    ```
+
+* Clone the `llama.cpp` repository in `~/src/`:
+
+    ```
+    mkdir -p ~/src
+    cd ~/src
+    git clone https://github.com/ggml-org/llama.cpp.git
+    cd ~/src/llama.cpp
+    git pull
+    ```
+
+* Install `requirements` for `the HF converter`:
+
+    ```
+    cd ~/src/llama.cpp
+    pip install -r requirements/requirements-convert_hf_to_gguf.txt
+    ```
+
+* Build `llama.cpp`:
+
+    ```
+    cd ~/src/llama.cpp
+    rm -rf build
+    cmake -B build
+    cmake --build build --config Release -j$(nproc)
+    ```
+
+* If you only want to build the `quantizer`:
+
+    ```
+    cd ~/src/llama.cpp
+    rm -rf build
+    cmake -B build
+    cmake --build build --config Release -j$(nproc) --target llama-quantize
+    ```
+
+## Fine-tune
+
+Do a full fine-tune of the model and star this command in the container:
+
+```
+automodel examples/qwen3_8b_asd-ste100_spark-asd-ste100.yaml \
+  --nproc-per-node 4
+```
+
+NOTE: This takes about 30 minutes on `SYS0`. The time to create a checkpoint is about 3 minutes. We get around 2900 tps (725 tps/GPU).
+
+When the work step is complete, you find the consolidated model here:
+
+```
+/opt/Automodel/checkpoints/LOWEST_VAL/model/consolidated/
+```
+
+NOTE: `Automodel` *consolidates* the model from all 4 GPUs automatically.
+
+## Convert from HF to GGUF
+
+`AutoModel` creates a model in the HuggingFace format. On `SYS0` convert it to GGUF:
+
+```
+cd ~/src/llama.cpp/
+python convert_hf_to_gguf.py \
+  /data/automodel/checkpoints/LOWEST_VAL/model/consolidated \
+  --outfile ~/models/qwen3-8b-asd-ste100-bf16.gguf \
+  --outtype bf16
+```
+
+NOTE: This will convert the model in the directory `~/models/`
+
+## Quantise the model (optional)
+
+```
+cd ~/src/llama.cpp/
+```
+
+### Quantise the model to `Q8_0`
+
+```
+./build/bin/llama-quantize \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q8_0.gguf \
+  Q8_0
+```
+
+### Quantise the model to `Q6_K`
+
+```
+./build/bin/llama-quantize \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q6_k.gguf \
+  Q6_K
+```
+
+### Quantise the model to `Q5_K_M`
+
+```
+./build/bin/llama-quantize \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q5_k_m.gguf \
+  Q5_K_M
+```
+
+### Quantise the model to `Q4_K_M`
+
+```
+./build/bin/llama-quantize \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q4_k_m.gguf \
+  Q4_K_M
+```
+
+### Size of the models:
+
+```
+15263 MB qwen3-8b-squad-bf16.gguf
+ 8307 MB qwen3-8b-squad-q8_0.gguf
+ 6415 MB qwen3-8b-squad-q6_k.gguf
+ 5581 MB qwen3-8b-squad-q5_k_m.gguf
+ 4683 MB qwen3-8b-squad-q4_k_m.gguf
+```
+
+## Create the `Modelfile`
+
+You must adjust the name of the GGUF file in the line that starts with `FROM`.
+
+```
+FROM qwen3-8b-asd-ste100-q6_k.gguf
+
+SYSTEM """You are a precise technical writer and requirements engineer specialised in ASD-STE100 (Simplified Technical English). Answer concisely based only on the provided context. /no_think"""
+
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{- range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+PARAMETER temperature 0.2
+PARAMETER top_p 0.8
+PARAMETER num_ctx 4096
+PARAMETER num_predict 512
+```
+
+You find the `Modelfile` [here](./configuration/Modelfile).
+
+When you use `Ollama` you can create a model with this:
+
+```
+ollama create qwen3-8b-asd-ste100 -f ~/Modelfile
+```
