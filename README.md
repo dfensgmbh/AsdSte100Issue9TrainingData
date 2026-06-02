@@ -187,7 +187,7 @@ NOTE: you *COULD* also set it as an environment variable in your `docker-compose
 
 * `Automodel` has example recipes in `/opt/Automodel/examples`. We can copy our example to this folder or specify the location of the 
 
-* You find the recipie for the example model [here](./configuration/qwen3_8b-asd-ste100.yaml).
+* You find the recipe for the example model [here](./configuration/qwen3_8b-asd-ste100.yaml).
 
 ### `llama.cpp`
 
@@ -209,10 +209,23 @@ NOTE: you *COULD* also set it as an environment variable in your `docker-compose
 
 * Install `requirements` for `the HF converter`:
 
+    When you have no `pip` install it into your cloned folder with:
     ```
     cd ~/src/llama.cpp
-    pip install -r requirements/requirements-convert_hf_to_gguf.txt
+    uv add pip
     ```
+
+    Create a virtual environment:
+    ```
+    cd ~/src/llama.cpp
+    uv venv
+    ```
+
+    ```
+    uv pip install -r requirements/requirements-convert_hf_to_gguf.txt
+    ```
+
+    NOTE: on `DGX` I got this dependency error: `there is no version of transformers==5.5.1`. I used `--index-strategy unsafe-best-match` to override this and install from [`nightly`](https://download.pytorch.org/whl/nightly).
 
 * Build `llama.cpp`:
 
@@ -234,19 +247,24 @@ NOTE: you *COULD* also set it as an environment variable in your `docker-compose
 
 ## Fine-tune
 
-Do a full fine-tune of the model and star this command in the container:
+Copy the recipe into the `/workspace` folder:
+
+Do a full fine-tune of the model and start this command in the container:
 
 ```
-automodel examples/qwen3_8b_asd-ste100_spark-asd-ste100.yaml \
+cd /workspace
+automodel qwen3_8b_asd-ste100_spark-asd-ste100.yaml \
   --nproc-per-node 4
 ```
+
+NOTE: you can start a shell in the container with: `docker exec -it automodel bash`.
 
 NOTE: This takes about 30 minutes on `SYS0`. The time to create a checkpoint is about 3 minutes. We get around 2900 tps (725 tps/GPU).
 
 When the work step is complete, you find the consolidated model here:
 
 ```
-/opt/Automodel/checkpoints/LOWEST_VAL/model/consolidated/
+/workspace/checkpoints/LOWEST_VAL/model/consolidated/
 ```
 
 NOTE: `Automodel` *consolidates* the model from all 4 GPUs automatically.
@@ -258,12 +276,12 @@ NOTE: `Automodel` *consolidates* the model from all 4 GPUs automatically.
 ```
 cd ~/src/llama.cpp/
 python convert_hf_to_gguf.py \
-  /data/automodel/checkpoints/LOWEST_VAL/model/consolidated \
-  --outfile ~/models/qwen3-8b-asd-ste100-bf16.gguf \
+  /workspace/checkpoints/LOWEST_VAL/model/consolidated \
+  --outfile /workspace/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
   --outtype bf16
 ```
 
-NOTE: This will convert the model in the directory `~/models/`
+NOTE: This will convert the model and put it in the directory `/workspace/checkpoints/`
 
 ## Quantise the model (optional)
 
@@ -275,8 +293,8 @@ cd ~/src/llama.cpp/
 
 ```
 ./build/bin/llama-quantize \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q8_0.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-q8_0.gguf \
   Q8_0
 ```
 
@@ -284,8 +302,8 @@ cd ~/src/llama.cpp/
 
 ```
 ./build/bin/llama-quantize \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q6_k.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-q6_k.gguf \
   Q6_K
 ```
 
@@ -293,8 +311,8 @@ cd ~/src/llama.cpp/
 
 ```
 ./build/bin/llama-quantize \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q5_k_m.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-q5_k_m.gguf \
   Q5_K_M
 ```
 
@@ -302,8 +320,8 @@ cd ~/src/llama.cpp/
 
 ```
 ./build/bin/llama-quantize \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
-  /data/automodel/checkpoints/qwen3-8b-asd-ste100-q4_k_m.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-bf16.gguf \
+  /workspace/checkpoints/qwen3-8b-asd-ste100-q4_k_m.gguf \
   Q4_K_M
 ```
 
@@ -343,8 +361,8 @@ PARAMETER num_predict 512
 
 You find the `Modelfile` [here](./configuration/Modelfile).
 
-When you use `Ollama` you can create a model with this:
+When you use `Ollama` you can create a model in the directory with the GGUF file and Modelfile with this:
 
 ```
-ollama create qwen3-8b-asd-ste100 -f ~/Modelfile
+ollama create qwen3-8b-asd-ste100
 ```
