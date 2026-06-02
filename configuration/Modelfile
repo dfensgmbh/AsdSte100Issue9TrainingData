@@ -1,0 +1,17 @@
+FROM qwen3-8b-asd-ste100-q6_k.gguf
+
+SYSTEM """You are a precise technical writer and requirements engineer specialised in ASD-STE100 (Simplified Technical English). Answer concisely based only on the provided context. /no_think"""
+
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{- range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+PARAMETER temperature 0.2
+PARAMETER top_p 0.8
+PARAMETER num_ctx 4096
+PARAMETER num_predict 512

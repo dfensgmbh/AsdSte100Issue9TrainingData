@@ -1,0 +1,31 @@
+services:
+  automodel:
+    image: nvcr.io/nvidia/nemo-automodel:26.04
+    container_name: automodel
+    user: "0:0"
+    volumes:
+      - /data/nvidia/models:/models
+      - /data/nvidia/datasets:/datasets
+      - /data/nvidia/workspace:/workspace
+      - /data/nvidia/results:/results
+      - /data/nvidia/hf_cache:/root/.cache/huggingface
+      - /data/automodel/checkpoints:/opt/Automodel/checkpoints
+    working_dir: /workspace
+    ipc: host
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    tty: true
+    stdin_open: true
+    entrypoint: /usr/bin/bash
+    environment:
+      - TRANSFORMER_ENGINE_PTE=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - HF_TOKEN=hf_your_token
